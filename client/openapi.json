@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Haq API",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "paths": {
     "/api/v1/health": {
@@ -11,6 +11,7 @@
           "meta"
         ],
         "summary": "Health",
+        "description": "Liveness only, so the keep-warm ping never wakes the database.",
         "operationId": "health_api_v1_health_get",
         "responses": {
           "200": {
@@ -29,6 +30,47 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Ready",
+        "operationId": "ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Readiness"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Readiness"
                 }
               }
             }
@@ -2209,6 +2251,30 @@
         "additionalProperties": false,
         "type": "object",
         "title": "PassbookFields"
+      },
+      "Readiness": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "ocr": {
+            "type": "boolean",
+            "title": "Ocr"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "database",
+          "ocr"
+        ],
+        "title": "Readiness"
       },
       "Scenario": {
         "properties": {

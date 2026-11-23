@@ -6,6 +6,9 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const apiProxy = { '/api': process.env.API_PROXY_TARGET ?? 'http://localhost:8000' };
+const tunnelHosts = ['.trycloudflare.com'];
+
 export default defineConfig({
   plugins: [
     react(),
@@ -29,6 +32,10 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  // With VITE_API_BASE_URL=/api/v1 the app calls its own origin and these proxies forward to
+  // the server, so one Cloudflare tunnel URL serves both on demo day.
+  server: { proxy: apiProxy, allowedHosts: tunnelHosts },
+  preview: { proxy: apiProxy, allowedHosts: tunnelHosts },
   test: {
     environment: 'jsdom',
   },

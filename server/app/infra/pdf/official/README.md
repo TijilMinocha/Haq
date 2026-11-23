@@ -1,17 +1,27 @@
 # Official claim forms
 
-Put the official, blank claim forms here, then add a map so Haq writes values onto them.
+Blank official claim forms that Haq fills in. Where each came from is in `SOURCES.md`.
 
-1. Download the blank forms from an official source, for example the Jan Suraksha portal
-   (jansuraksha.gov.in, "Forms") or your bank's website. Save them as
-   `PMJJBY.pdf`, `PMSBY.pdf` and `RUPAY_PMJDY.pdf` in this folder.
-2. From `server/`, render a grid over a form to read off coordinates (in points, origin at
-   the top left):
-   `uv run python -m scripts.calibrate_form PMJJBY`
-   This writes `official/PMJJBY-page<N>-grid.png` for each page.
-3. Create `PMJJBY.yaml` like `example.yaml.txt`, with one entry per value. The value keys
-   are listed in `app/services/forms/official_values.py`.
-4. Download a claim form from the API and check that every value sits in its box.
+| Scheme | Form | Map |
+|---|---|---|
+| PMJJBY | `pmjjby.pdf` | `PMJJBY.yaml` |
+| PMSBY | `pmsby.pdf` | `PMSBY.yaml` |
+| RuPay PMJDY | `rupay_pmjdy.pdf` | `RUPAY_PMJDY.yaml` |
 
-Without a form and map, Haq generates its own bilingual claim-details form instead.
-Both are always included: the official form first, then Haq's details pages.
+`enrolment/` holds the scheme **enrolment** forms (consent-cum-declaration). They are for
+re-joining a lapsed scheme, never for claims.
+
+A claim-form download returns the filled official form first, then Haq's bilingual
+claim-details pages (deadline, blockers, evidence, checklist). If a form or its map is
+missing, only Haq's pages are returned.
+
+## Updating a form (for example, a new financial year's RuPay form)
+
+1. Replace the PDF here and update `SOURCES.md`.
+2. Write the map like `example.yaml.txt`. Anchor each value to its printed label where the
+   PDF has selectable text; the value keys are in `app/services/forms/official_values.py`.
+3. Only for labels that are not text (scanned forms), read coordinates off a grid:
+   `uv run python -m scripts.calibrate_form PMJJBY` (from `server/`) writes
+   `PMJJBY-page<N>-grid.png` here. These images are gitignored.
+4. Run the tests: `tests/unit/forms/test_official_forms.py` fails if any anchor is missing.
+   Then download a filled form and check that every value sits in its box.

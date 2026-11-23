@@ -1,0 +1,11 @@
+# Government PMJJBY claim-cum-discharge form. Source: see SOURCES.md.
+# Values are written just after each label; Part 3 is left for the bank.
+template: pmjjby.pdf
+fields:
+  - { value: insured_name, page: 0, anchor: "(1) Name:" }
+  - { value: death_date, page: 0, anchor: "(4) Date of death:" }
+  - { value: cause, page: 0, anchor: "(5) Cause of death" , x: 385 }
+  - { value: proof_of_death, page: 0, anchor: "days of joining the scheme, proof of accidental death", x: 392 }
+  - { value: nominee_name, page: 0, anchor: "1. Name of the nominee:" }
+  - { value: claimant_relation, page: 0, anchor: "6. Relationship of the nominee/claimant with the deceased:" }
+  - { value: insured_name, page: 3, anchor: "discharge of my claim under the said policy covering insurance in respect of member Shri/Ms", x: 92, dy: 18 }

@@ -64,6 +64,12 @@ class TesseractExtractor:
             raise ExtractorUnavailable(f"none of {self._wanted} installed")
         return usable
 
+    def ready(self) -> bool:
+        try:
+            return bool(self._passes)
+        except ExtractorUnavailable:
+            return False
+
     def _ocr(self, image: Image, kind: DocumentKind, languages: str) -> OcrPage:
         try:
             data = pytesseract.image_to_data(

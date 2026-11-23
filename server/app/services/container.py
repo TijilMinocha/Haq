@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from app.core.attempts import AttemptStore, InMemoryAttemptStore
@@ -30,7 +31,19 @@ class Container:
     case_service: CaseService
     document_service: DocumentService
     auth_service: AuthService
+    extractor: Extractor | None = None
     engine: AsyncEngine | None = None
+
+    async def database_ready(self) -> bool:
+        if self.engine is None:
+            return True
+        try:
+            async with self.engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+        except Exception:
+            # Any failure means not ready; the details are in the database driver's log.
+            return False
+        return True
 
     async def close(self) -> None:
         if self.engine is not None:
@@ -61,13 +74,13 @@ def build_container(settings: Settings, extractor: Extractor | None = None) -> C
         login_attempts = InMemoryAttemptStore(settings.lockout_attempts, lock_seconds)
 
     case_service = CaseService(cases, case_attempts)
+    reader = extractor or build_extractor(settings)
     return Container(
         cases=cases,
         operators=operators,
         case_service=case_service,
-        document_service=DocumentService(
-            cases, case_service, extractor or build_extractor(settings), settings.max_upload_mb
-        ),
-        auth_service=AuthService(operators, login_attempts),
+        document_service=DocumentService(cases, case_service, reader, settings.max_upload_mb),
+        auth_service=AuthService(operators, login_attempts, settings.seed_password),
+        extractor=reader,
         engine=engine,
     )

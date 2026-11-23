@@ -1,0 +1,10 @@
+# Government PMSBY claim-cum-discharge form. Source: see SOURCES.md.
+template: pmsby.pdf
+fields:
+  - { value: insured_name, page: 0, anchor: "(1) Name:" }
+  - { value: event_day_date, page: 0, anchor: "(6) Day, date, and time of accident:" }
+  - { value: death_date, page: 0, anchor: "(9) Date of death:" }
+  - { value: cause, page: 0, anchor: "(10) Cause of death / disability" , x: 340 }
+  - { value: proof_of_death, page: 0, anchor: "(12) Document attached as proof of permanent disability" , x: 420 }
+  - { value: nominee_name, page: 0, anchor: "1. Name of the nominee:" }
+  - { value: claimant_relation, page: 0, anchor: "6. Relationship of the nominee/claimant with the deceased:" }

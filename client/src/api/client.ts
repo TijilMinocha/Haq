@@ -11,7 +11,9 @@ const CASE_PATH = /\/cases\/([^/]+)/;
 
 export function authHeaders(url: string): Record<string, string> {
   const headers: Record<string, string> = {};
-  const caseId = CASE_PATH.exec(new URL(url, env.apiOrigin).pathname)?.[1];
+  const caseId = CASE_PATH.exec(
+    new URL(url, env.apiOrigin || window.location.origin).pathname,
+  )?.[1];
   const caseToken = caseId && caseId !== 'resume' ? getCaseToken(caseId) : undefined;
   if (caseToken) headers['X-Case-Token'] = caseToken;
   const operatorToken = getOperatorToken();

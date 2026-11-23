@@ -33,6 +33,9 @@ class MockExtractor:
     def __init__(self, samples_dir: Path = SAMPLES_DIR) -> None:
         self._index = sample_index(samples_dir)
 
+    def ready(self) -> bool:
+        return True
+
     async def extract(
         self, content: bytes, content_type: str, kind: DocumentKind
     ) -> ExtractionResult:

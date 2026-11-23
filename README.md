@@ -13,6 +13,7 @@ Built for Hack With Delhi 4.0, Track 1 (claim settlement assistance for micro-in
 - `client/`: React 19 + TypeScript + Vite PWA
 - `docs/`: proposal and engineering plan
 - `docs/handoff/`: backend-to-frontend handoff (start with `docs/handoff/README.md`)
+- `docs/deploy.md`: deploying to Neon, Render and Vercel (free), plus the demo backup
 
 ## Run locally
 

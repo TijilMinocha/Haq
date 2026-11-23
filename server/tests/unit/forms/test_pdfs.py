@@ -59,8 +59,8 @@ def _official_dir(tmp_path: Path, with_template: bool = True) -> Path:
         doc.save(tmp_path / "PMJJBY.pdf")
     (tmp_path / "PMJJBY.yaml").write_text(
         "template: PMJJBY.pdf\nfields:\n"
-        "  insured_name: { page: 0, x: 200, y: 120, width: 250 }\n"
-        "  claimant_name: { page: 0, x: 200, y: 160, width: 250 }\n",
+        "  - { value: insured_name, page: 0, x: 200, y: 110 }\n"
+        "  - { value: claimant_name, page: 0, anchor: OFFICIAL, x: 200, dy: 98 }\n",
         encoding="utf-8",
     )
     return tmp_path
