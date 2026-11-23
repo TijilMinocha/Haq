@@ -1,24 +1,32 @@
 # Verify every value against the current FY circulars from DFS, NPCI and the bank before the demo.
 fy: "2026-27"
 cover_year: { start: "06-01", end: "05-31" }
+
 schemes:
   PMJJBY:
     sum_assured: 200000
-    premium_amounts: [436]
+    # Full-year premium plus the pro-rata amounts for mid-year enrolment. # verify
+    premium_amounts: [436, 342, 228, 114]
     narration_patterns: ["PMJJBY", "JJBY", "JEEVAN JYOTI"]
     renewal_debit_window: { from: "05-25", to: "05-31" } # verify
     lien_days: 30
     claim_preferred_within_days: 30
-    documents: [death_certificate, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof, passbook]
+    max_cover_age: 55
+    documents:
+      natural_death: [passbook, death_certificate, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof]
+      accidental_death: [passbook, death_certificate, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof]
 
   PMSBY:
     death_or_total_disability: 200000
     partial_disability: 100000
     premium_amounts: [20]
     narration_patterns: ["PMSBY", "SBY", "SURAKSHA BIMA"]
+    renewal_debit_window: { from: "05-25", to: "05-31" } # verify
     claim_preferred_within_days: 30
-    accident_documents: [fir, postmortem]
-    documents: [death_certificate, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof, passbook]
+    max_cover_age: 70
+    documents:
+      accidental_death: [passbook, death_certificate, fir, postmortem, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof]
+      accidental_disability: [passbook, disability_certificate, fir, aadhaar_deceased, nominee_bank_proof]
 
   RUPAY_PMJDY:
     sum_insured: { old_card: 100000, new_card: 200000 }
@@ -26,8 +34,32 @@ schemes:
     eligible_bins: ["607392", "608031", "817509"]
     txn_lookback_days: 90
     counting_channels: [ATM, MICRO_ATM, POS, ECOM, BC]
+    unverifiable_channels: [UPI, AEPS]
     intimation_within_days: 90
-    documents: [death_certificate, fir, postmortem, aadhaar_deceased, rupay_card, passbook]
+    expiry_warning_days: 30
+    documents:
+      accidental_death: [passbook, death_certificate, fir, postmortem, aadhaar_deceased, rupay_card]
+      accidental_disability: [passbook, disability_certificate, fir, aadhaar_deceased, rupay_card]
+
+# Documents that must exist before any accident claim is filed.
+accident_documents:
+  accidental_death: [fir, postmortem]
+  accidental_disability: [fir]
+
+# Used only when the extractor could not tell the channel. Order matters: first match wins,
+# so the more specific MICRO ATM pattern sits before ATM.
+channel_patterns:
+  - { channel: MICRO_ATM, patterns: ["MICRO ATM", "MATM"] }
+  - { channel: AEPS, patterns: ["AEPS"] }
+  - { channel: UPI, patterns: ["UPI"] }
+  - { channel: ATM, patterns: ["ATM", "ATW", "NFS"] }
+  - { channel: POS, patterns: ["POS", "PRCH"] }
+  - { channel: ECOM, patterns: ["ECOM", "E-COM", "ONLINE PURCHASE"] }
+  - { channel: BC, patterns: ["BC/", "CSP", "KIOSK", "BANK MITRA"] }
 
 matching:
   name_threshold: 88
+  min_confidence: 0.6
+
+deadlines:
+  closing_warning_days: 7

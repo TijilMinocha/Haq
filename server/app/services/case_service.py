@@ -83,7 +83,7 @@ class CaseService:
         return CaseResumed(case_id=record.view.id, access_token=token)
 
     def view(self, record: CaseRecord) -> CaseView:
-        return record.view.model_copy(update={"evaluation": evaluate(record)})
+        return record.view.model_copy(update={"evaluation": evaluate(record.view)})
 
     async def update(self, record: CaseRecord, patch: CaseUpdate) -> CaseView:
         changes = patch.model_dump(exclude_unset=True)
