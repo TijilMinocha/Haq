@@ -6,11 +6,15 @@ services:
     runtime: docker
     plan: free
     region: singapore
-    rootDir: server
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    # Paths are from the repo root; the image is built from server/ only.
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
     healthCheckPath: /api/v1/health
     autoDeploy: true
+    # Client-only or docs-only pushes do not rebuild the API.
+    buildFilter:
+      paths:
+        - server/**
     envVars:
       - key: ENV
         value: prod
@@ -25,8 +29,6 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGINS
-        sync: false
-      - key: CORS_ORIGIN_REGEX
         sync: false
       - key: SEED_OPERATOR_PASSWORD
         sync: false
