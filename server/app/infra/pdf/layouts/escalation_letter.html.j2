@@ -1,0 +1,35 @@
+{% from "_macros.html.j2" import value %}
+<div class="letter">
+{% if lang == "hi" %}
+<p class="hi">सेवा में,<br/>शाखा प्रबंधक,<br/>{{ value(f.bank) }}, {{ value(f.branch) }} शाखा</p>
+<p class="hi">दिनांक: {{ f.prepared_on }}</p>
+<p class="hi"><b>विषय: {{ f.scheme_name.hi }} के अंतर्गत दावे के निपटारे हेतु अनुरोध
+(खाता {{ value(f.account) }}{% if f.insured_name %}, {% if f.is_death %}स्व. {% endif %}{{ f.insured_name }}{% endif %})</b></p>
+<p class="hi">महोदय/महोदया,</p>
+<p class="hi">मैं, {{ value(f.claimant_name) }}{% if f.is_death %}, {% if f.claimant_relation %}{{ f.claimant_relation.hi }}{% else %}नॉमिनी{% endif %}, स्व. {{ value(f.insured_name) }}{% endif %},
+ने इस खाते पर {{ f.scheme_name.hi }} के अंतर्गत दावा दिनांक ________ को सभी ज़रूरी दस्तावेज़ों के साथ
+आपकी शाखा में जमा किया था।
+{% if f.evidence %}पासबुक के अनुसार प्रीमियम {{ f.evidence[0].date }} को {{ f.evidence[0].amount }} काटा गया था, इसलिए बीमा उस समय लागू था।{% endif %}</p>
+<p class="hi">दावा राशि {{ f.claim_amount }} का भुगतान अभी तक नहीं हुआ है। कृपया दावे का जल्द निपटारा करें,
+या लिखित में बताएँ कि क्या बाकी है ताकि मैं उसे तुरंत जमा कर सकूँ।</p>
+<p class="hi">उत्तर न मिलने पर मैं बैंक की शिकायत निवारण इकाई और संबंधित लोकपाल के पास शिकायत करने के लिए बाध्य होऊँगा/होऊँगी।</p>
+<p class="hi">धन्यवाद।</p>
+<p class="hi sign">भवदीय/भवदीया,<br/>{{ value(f.claimant_name) }}<br/>हस्ताक्षर/अंगूठे का निशान: ________________<br/>मोबाइल: ________________<br/>केस: {{ f.case_code }}</p>
+{% else %}
+<p>To,<br/>The Branch Manager,<br/>{{ value(f.bank) }}, {{ value(f.branch) }} branch</p>
+<p>Date: {{ f.prepared_on }}</p>
+<p><b>Subject: Request to settle the claim under {{ f.scheme_name.en }}
+(account {{ value(f.account) }}{% if f.insured_name %}, {% if f.is_death %}late {% endif %}{{ f.insured_name }}{% endif %})</b></p>
+<p>Dear Sir/Madam,</p>
+<p>I, {{ value(f.claimant_name) }}{% if f.is_death %}, {% if f.claimant_relation %}{{ f.claimant_relation.en|lower }}{% else %}nominee{% endif %} of late {{ value(f.insured_name) }}{% endif %},
+submitted a claim under {{ f.scheme_name.en }} on this account at your branch on ________,
+with all the required documents.
+{% if f.evidence %}The passbook shows the premium of {{ f.evidence[0].amount }} debited on {{ f.evidence[0].date }}, so the cover was in force.{% endif %}</p>
+<p>The claim of {{ f.claim_amount }} has not been paid yet. Please settle it at the earliest,
+or tell me in writing what is pending so that I can submit it immediately.</p>
+<p>If I do not hear from you, I will have to raise a complaint with the bank's grievance
+redressal cell and the appropriate ombudsman.</p>
+<p>Thank you.</p>
+<p class="sign">Yours faithfully,<br/>{{ value(f.claimant_name) }}<br/>Signature or thumb impression: ________________<br/>Mobile: ________________<br/>Case: {{ f.case_code }}</p>
+{% endif %}
+</div>

@@ -13,3 +13,6 @@ coverage/
 .DS_Store
 .vscode/
 .idea/
+
+# Calibration output
+server/app/infra/pdf/official/*-grid.png

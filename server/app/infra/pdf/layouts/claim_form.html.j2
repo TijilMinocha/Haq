@@ -1,0 +1,87 @@
+{% from "_macros.html.j2" import row, rowhtml, value %}
+<h1>Claim details: {{ f.scheme_name.en }}</h1>
+<p class="hi">दावा विवरण: {{ f.scheme_name.hi }}</p>
+<p class="sub">Prepared with Haq on {{ f.prepared_on }}. Case {{ f.case_code }}.
+Attach this to the bank's claim form if the branch asks for its own format. /
+<span class="hi">अगर शाखा अपना फ़ॉर्म माँगे, तो यह विवरण उसके साथ लगाएँ।</span></p>
+
+{% if f.deadline %}
+<div class="box"><b>Submit by {{ f.deadline_date }}</b>
+{% if f.deadline.hard %}(last date){% else %}(preferred; a later claim needs an explanation){% endif %}
+/ <span class="hi">{{ f.deadline_date }} तक जमा करें</span></div>
+{% endif %}
+
+{% if f.blockers %}
+<div class="warn"><b>Fix before submitting / <span class="hi">जमा करने से पहले ठीक करें</span></b>
+{% for b in f.blockers %}<p>&#8226; {{ b.en }}<br/><span class="hi">{{ b.hi }}</span></p>{% endfor %}</div>
+{% endif %}
+
+<h2>1. Insured person / <span class="hi">बीमित व्यक्ति</span></h2>
+<div>
+{{ row("Name", "नाम", f.insured_name) }}
+{{ row("Date of birth", "जन्म तिथि", f.insured_dob) }}
+{{ row("Bank", "बैंक", f.bank) }}
+{{ row("Branch", "शाखा", f.branch) }}
+{{ row("IFSC", "IFSC", f.ifsc) }}
+{{ row("Savings account number", "बचत खाता संख्या", f.account) }}
+{% if f.card %}{{ row("RuPay card", "रुपे कार्ड", f.card) }}{% endif %}
+</div>
+
+<h2>2. What happened / <span class="hi">क्या हुआ</span></h2>
+<div>
+{% call rowhtml("Event", "घटना") %}{% if f.event %}{{ f.event.en }} / <span class="hi">{{ f.event.hi }}</span>{% else %}{{ value(none) }}{% endif %}{% endcall %}
+{{ row("Date", "तारीख", f.event_date) }}
+{% if f.is_death %}
+{{ row("Place of death", "मृत्यु का स्थान", f.place) }}
+{{ row("Death registration number", "मृत्यु पंजीकरण संख्या", f.death_registration) }}
+{{ row("Age at death", "मृत्यु के समय आयु", f.insured_age) }}
+{% endif %}
+{% if f.scheme.value != "PMJJBY" %}
+{{ row("FIR number", "FIR संख्या", f.fir_number) }}
+{% if f.is_death %}{{ row("Post-mortem report number", "पोस्टमार्टम रिपोर्ट संख्या", f.postmortem_number) }}{% endif %}
+{% endif %}
+{% if f.card_last_use %}{{ row("Last card use before the accident", "दुर्घटना से पहले कार्ड का आख़िरी इस्तेमाल", f.card_last_use) }}{% endif %}
+</div>
+
+<h2>3. Claimant / <span class="hi">दावेदार</span></h2>
+{% if f.nominee_missing %}
+<div class="warn">No nominee is registered. The bank will ask for a legal-heir certificate. /
+<span class="hi">कोई नॉमिनी दर्ज नहीं है। बैंक कानूनी वारिस प्रमाण पत्र माँगेगा।</span></div>
+{% endif %}
+<div>
+{{ row("Name", "नाम", f.claimant_name) }}
+{% call rowhtml("Relation to insured", "बीमित से संबंध") %}{% if f.claimant_relation %}{{ f.claimant_relation.en }} / <span class="hi">{{ f.claimant_relation.hi }}</span>{% elif not f.is_death %}Self / <span class="hi">स्वयं</span>{% else %}{{ value(none) }}{% endif %}{% endcall %}
+{{ row("Mobile number", "मोबाइल नंबर", none) }}
+{{ row("Address", "पता", none) }}
+{{ row("Bank account for payment", "भुगतान के लिए बैंक खाता", none) }}
+</div>
+
+<h2>4. Cover found in the passbook / <span class="hi">पासबुक में मिला बीमा</span></h2>
+{% if f.evidence %}
+<table><tr><th>Date / <span class="hi">तारीख</span></th><th>Passbook entry / <span class="hi">पासबुक प्रविष्टि</span></th><th>Amount / <span class="hi">राशि</span></th></tr>
+{% for e in f.evidence %}<tr><td>{{ e.date }}</td><td>{{ e.narration }}</td><td>{{ e.amount }}</td></tr>{% endfor %}
+</table>
+{% else %}<p>{{ value(none) }}</p>{% endif %}
+<p>Amount claimed / <span class="hi">दावा राशि</span>: <span class="amount">{{ f.claim_amount }}</span></p>
+
+<h2>5. Documents attached / <span class="hi">संलग्न दस्तावेज़</span></h2>
+<div>
+{% for d in f.documents %}
+<p class="kv">{% if d.received %}[x]{% else %}[&nbsp;&nbsp;]{% endif %}&nbsp; {{ d.name.en }} / <span class="hi">{{ d.name.hi }}</span>{% if not d.received %} <span class="blank">(still needed / <span class="hi">अभी चाहिए</span>)</span>{% endif %}</p>
+{% endfor %}
+</div>
+
+<h2>6. Declaration / <span class="hi">घोषणा</span></h2>
+<p>I declare that the details above are true to the best of my knowledge. /
+<span class="hi">मैं घोषणा करता/करती हूँ कि ऊपर दी गई जानकारी मेरी जानकारी में सही है।</span></p>
+<p class="sign">Signature or thumb impression / <span class="hi">हस्ताक्षर या अंगूठे का निशान</span>: ________________ &nbsp;
+Date / <span class="hi">तारीख</span>: ________ &nbsp; Place / <span class="hi">स्थान</span>: ________</p>
+
+<h2>For bank use / <span class="hi">बैंक उपयोग हेतु</span></h2>
+<div class="box">
+<p class="kv"><span class="k">Premium debit verified on:</span> ________________</p>
+<p class="kv"><span class="k">Account and cover in force on the event date:</span> Yes / No</p>
+<p class="kv"><span class="k">Claim received on:</span> ________________</p>
+<p class="kv"><span class="k">Forwarded to insurer on:</span> ________________</p>
+<p class="kv sign"><span class="k">Branch seal and signature:</span> ________________</p>
+</div>

@@ -37,8 +37,9 @@ API docs: http://localhost:8000/docs
 ## Status
 
 Rules engine (phase 2), Postgres persistence with case code + PIN and Bank Mitra login
-(phase 3), and Tesseract extraction for passbooks, death certificates, Aadhaar and RuPay
-cards (phase 4) are in.
+(phase 3), Tesseract extraction for passbooks, death certificates, Aadhaar and RuPay
+cards (phase 4), and bilingual claim forms and escalation letters (phase 5) are in.
+To overlay the official bank forms, see `server/app/infra/pdf/official/README.md`.
 
 Sample document photos for the demo live in `server/app/services/stubs/samples/`
 (regenerate with `uv run python -m scripts.make_samples`). OCR tests need the tesseract

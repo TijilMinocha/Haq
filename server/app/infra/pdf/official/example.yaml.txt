@@ -1,0 +1,9 @@
+# Copy to <SCHEME>.yaml. Coordinates are PDF points from the top-left; y is the text baseline.
+template: PMJJBY.pdf
+fields:
+  insured_name: { page: 0, x: 210, y: 182, width: 300 }
+  account: { page: 0, x: 210, y: 204 }
+  event_date: { page: 0, x: 210, y: 226 }
+  claimant_name: { page: 0, x: 210, y: 248, width: 300 }
+  claimant_relation: { page: 0, x: 210, y: 270 }
+  claim_amount: { page: 0, x: 210, y: 292, size: 10 }
