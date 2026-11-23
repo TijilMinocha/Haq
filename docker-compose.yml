@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: haq
+      POSTGRES_PASSWORD: haq
+      POSTGRES_DB: haq
+    ports:
+      - "5432:5432"
+    volumes:
+      - haq-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U haq"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  haq-db:

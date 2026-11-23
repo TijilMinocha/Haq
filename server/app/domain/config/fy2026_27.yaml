@@ -1,0 +1,33 @@
+# Verify every value against the current FY circulars from DFS, NPCI and the bank before the demo.
+fy: "2026-27"
+cover_year: { start: "06-01", end: "05-31" }
+schemes:
+  PMJJBY:
+    sum_assured: 200000
+    premium_amounts: [436]
+    narration_patterns: ["PMJJBY", "JJBY", "JEEVAN JYOTI"]
+    renewal_debit_window: { from: "05-25", to: "05-31" } # verify
+    lien_days: 30
+    claim_preferred_within_days: 30
+    documents: [death_certificate, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof, passbook]
+
+  PMSBY:
+    death_or_total_disability: 200000
+    partial_disability: 100000
+    premium_amounts: [20]
+    narration_patterns: ["PMSBY", "SBY", "SURAKSHA BIMA"]
+    claim_preferred_within_days: 30
+    accident_documents: [fir, postmortem]
+    documents: [death_certificate, aadhaar_deceased, aadhaar_nominee, nominee_bank_proof, passbook]
+
+  RUPAY_PMJDY:
+    sum_insured: { old_card: 100000, new_card: 200000 }
+    new_card_after: "2018-08-28"
+    eligible_bins: ["607392", "608031", "817509"]
+    txn_lookback_days: 90
+    counting_channels: [ATM, MICRO_ATM, POS, ECOM, BC]
+    intimation_within_days: 90
+    documents: [death_certificate, fir, postmortem, aadhaar_deceased, rupay_card, passbook]
+
+matching:
+  name_threshold: 88

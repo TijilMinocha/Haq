@@ -1,0 +1,40 @@
+{
+  "mode": "claim",
+  "language": "hi",
+  "subject": { "name": "Suresh Yadav", "date_of_birth": "1979-08-04" },
+  "event": { "type": "natural_death", "date": "2026-07-10" },
+  "nominee": { "name": "Meena Yadav", "relation": "wife" },
+  "documents": [
+    {
+      "id": "d_01", "kind": "passbook", "status": "extracted", "confidence": 0.9,
+      "fields": {
+        "account_holder": "Suresh Yadav", "bank": "PNB", "branch": "Mangolpuri",
+        "account_last4": "9021", "nominee_name": "Meena Yadav",
+        "transactions": [
+          { "date": "2026-06-20", "narration": "PMJJBY RENEWAL PREM", "amount": 436, "direction": "debit", "channel": "OTHER" },
+          { "date": "2026-06-25", "narration": "UPI/P2M/KIRANA", "amount": 340, "direction": "debit", "channel": "UPI" }
+        ]
+      }
+    }
+  ],
+  "evaluation": {
+    "total_claimable": 0,
+    "covers": [
+      { "scheme": "PMJJBY", "status": "ineligible", "amount": 0,
+        "evidence": [ { "date": "2026-06-20", "narration": "PMJJBY RENEWAL PREM", "amount": 436 } ],
+        "reasons": [ { "code": "death_within_lien_period", "params": { "days_since_enrolment": 20, "lien_days": 30 } } ] },
+      { "scheme": "PMSBY", "status": "not_found", "amount": 0, "evidence": [],
+        "reasons": [ { "code": "no_premium_found", "params": {} } ] },
+      { "scheme": "RUPAY_PMJDY", "status": "ineligible", "amount": 0, "evidence": [],
+        "reasons": [ { "code": "accident_only_cover", "params": {} } ] }
+    ],
+    "flags": [
+      { "code": "death_within_lien_period", "severity": "info",
+        "params": { "days_since_enrolment": 20, "lien_days": 30 },
+        "message": "Natural death within 30 days of enrolment; PMJJBY not payable." }
+    ],
+    "checklist": [],
+    "deadlines": [],
+    "alerts": []
+  }
+}

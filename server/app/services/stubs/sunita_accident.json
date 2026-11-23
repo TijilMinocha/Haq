@@ -1,0 +1,65 @@
+{
+  "mode": "claim",
+  "language": "hi",
+  "subject": { "name": "Ramesh Kumar", "date_of_birth": "1984-03-12" },
+  "event": { "type": "accidental_death", "date": "2026-11-15" },
+  "nominee": { "name": "Sunita Devi", "relation": "wife" },
+  "documents": [
+    {
+      "id": "d_01", "kind": "passbook", "status": "extracted", "confidence": 0.92,
+      "fields": {
+        "account_holder": "Ramesh Kumar", "bank": "SBI", "branch": "Seelampur",
+        "ifsc": "SBIN0001234", "account_last4": "4417", "nominee_name": "Sunita Devi",
+        "card_bin": "607392", "card_issued_on": "2019-02-11",
+        "transactions": [
+          { "date": "2026-05-28", "narration": "PMJJBY PREMIUM", "amount": 436, "direction": "debit", "channel": "OTHER" },
+          { "date": "2026-05-30", "narration": "PMSBY PREMIUM", "amount": 20, "direction": "debit", "channel": "OTHER" },
+          { "date": "2026-10-02", "narration": "BY CASH", "amount": 3000, "direction": "credit", "channel": "CASH" },
+          { "date": "2026-10-30", "narration": "ATM WDL SEELAMPUR", "amount": 2000, "direction": "debit", "channel": "ATM" }
+        ]
+      }
+    },
+    {
+      "id": "d_02", "kind": "death_certificate", "status": "extracted", "confidence": 0.88,
+      "fields": {
+        "deceased_name": "Rames Kumar", "date_of_death": "2026-11-15", "age": 42,
+        "place_of_death": "GTB Hospital, Delhi", "registration_number": "D-2026-118842"
+      }
+    }
+  ],
+  "evaluation": {
+    "total_claimable": 600000,
+    "covers": [
+      { "scheme": "PMJJBY", "status": "eligible", "amount": 200000,
+        "evidence": [ { "date": "2026-05-28", "narration": "PMJJBY PREMIUM", "amount": 436 } ],
+        "reasons": [ { "code": "premium_debited_current_year", "params": {} } ] },
+      { "scheme": "PMSBY", "status": "eligible", "amount": 200000,
+        "evidence": [ { "date": "2026-05-30", "narration": "PMSBY PREMIUM", "amount": 20 } ],
+        "reasons": [ { "code": "premium_debited_current_year", "params": {} }, { "code": "accidental_event", "params": {} } ] },
+      { "scheme": "RUPAY_PMJDY", "status": "likely_eligible", "amount": 200000,
+        "evidence": [ { "date": "2026-10-30", "narration": "ATM WDL SEELAMPUR", "amount": 2000 } ],
+        "reasons": [ { "code": "card_txn_within_lookback", "params": { "days_before_event": 16 } }, { "code": "new_card_amount", "params": {} } ] }
+    ],
+    "flags": [
+      { "code": "name_mismatch", "severity": "blocker",
+        "params": { "documents": ["death_certificate", "passbook"], "values": ["Rames Kumar", "Ramesh Kumar"] },
+        "message": "Name differs between death certificate and passbook." },
+      { "code": "accident_docs_missing", "severity": "blocker",
+        "params": { "missing": ["fir", "postmortem"] },
+        "message": "FIR or post-mortem report needed for accident claims." }
+    ],
+    "checklist": [
+      { "scheme": "PMJJBY", "document_kind": "death_certificate", "required": true, "status": "received" },
+      { "scheme": "PMJJBY", "document_kind": "aadhaar_nominee", "required": true, "status": "missing" },
+      { "scheme": "PMSBY", "document_kind": "fir", "required": true, "status": "missing" },
+      { "scheme": "PMSBY", "document_kind": "postmortem", "required": true, "status": "missing" },
+      { "scheme": "RUPAY_PMJDY", "document_kind": "rupay_card", "required": true, "status": "missing" }
+    ],
+    "deadlines": [
+      { "scheme": "PMJJBY", "code": "claim_submission", "due_date": "2026-12-15", "days_left": 0, "hard": false },
+      { "scheme": "PMSBY", "code": "claim_submission", "due_date": "2026-12-15", "days_left": 0, "hard": false },
+      { "scheme": "RUPAY_PMJDY", "code": "claim_intimation", "due_date": "2027-02-13", "days_left": 0, "hard": true }
+    ],
+    "alerts": []
+  }
+}

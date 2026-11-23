@@ -1,0 +1,99 @@
+{
+  "app": {
+    "name": "हक़",
+    "tagline": "आपके परिवार का बीमा पैसा खोजें"
+  },
+  "schemes": {
+    "PMJJBY": {
+      "name": "PMJJBY जीवन बीमा",
+      "explanation": "खाताधारक की किसी भी कारण से मृत्यु पर ₹2 लाख। ₹436 सालाना, खाते से अपने आप कटता है।"
+    },
+    "PMSBY": {
+      "name": "PMSBY दुर्घटना बीमा",
+      "explanation": "दुर्घटना में मृत्यु या पूरी विकलांगता पर ₹2 लाख। ₹20 सालाना, खाते से अपने आप कटता है।"
+    },
+    "RUPAY_PMJDY": {
+      "name": "RuPay कार्ड दुर्घटना बीमा",
+      "explanation": "दुर्घटना में मृत्यु पर ₹2 लाख तक, अगर पिछले 90 दिनों में RuPay कार्ड इस्तेमाल हुआ हो।"
+    }
+  },
+  "cover_status": {
+    "eligible": "मिल सकता है",
+    "likely_eligible": "शायद मिल सकता है",
+    "needs_verification": "बैंक पुष्टि करेगा",
+    "lapsed": "बंद हो गया",
+    "ineligible": "नहीं मिलेगा",
+    "not_found": "नहीं मिला"
+  },
+  "reasons": {
+    "premium_debited_current_year": "इस साल प्रीमियम कटा है",
+    "accidental_event": "घटना दुर्घटना थी",
+    "card_txn_within_lookback": "दुर्घटना से पहले 90 दिनों में कार्ड इस्तेमाल हुआ",
+    "new_card_amount": "कार्ड अगस्त 2018 के बाद बना: ₹2 लाख बीमा",
+    "death_within_lien_period": "जुड़ने के {{days_since_enrolment}} दिन बाद मृत्यु; पहले {{lien_days}} दिन केवल दुर्घटना कवर होती है",
+    "no_premium_found": "पासबुक में प्रीमियम कटने का रिकॉर्ड नहीं मिला",
+    "accident_only_cover": "यह बीमा केवल दुर्घटना पर मिलता है",
+    "no_premium_this_cover_year": "इस साल प्रीमियम नहीं कटा; पिछली बार {{last_debit}} को कटा"
+  },
+  "flags": {
+    "name_mismatch": "दस्तावेज़ों में नाम अलग-अलग है",
+    "dob_mismatch": "दस्तावेज़ों में जन्म तिथि अलग-अलग है",
+    "account_mismatch": "पासबुक का खाता दावे वाले खाते से अलग है",
+    "nominee_missing": "कोई नॉमिनी नहीं है; कानूनी वारिस का रास्ता लेना होगा",
+    "death_within_lien_period": "PMJJBY से जुड़ने के 30 दिन के अंदर मृत्यु; यह नहीं मिलेगा",
+    "rupay_no_recent_txn": "दुर्घटना से पहले 90 दिनों में कार्ड इस्तेमाल नहीं हुआ",
+    "rupay_txn_unverifiable": "केवल UPI या AEPS लेनदेन मिला; बैंक को कार्ड इस्तेमाल की पुष्टि करनी होगी",
+    "accident_docs_missing": "दुर्घटना के दावे के लिए FIR या पोस्टमार्टम रिपोर्ट चाहिए",
+    "claim_window_closing": "आख़िरी तारीख़ 7 दिन के अंदर है",
+    "claim_window_passed": "समय निकल गया है; कारण लिखकर दावा करें",
+    "ocr_low_confidence": "फ़ोटो से पढ़ी गई जानकारी एक बार जाँच लें"
+  },
+  "alert": {
+    "cover_lapsed": "आपका बीमा बंद हो गया है: इस साल प्रीमियम नहीं कटा",
+    "rupay_expiring": "RuPay बीमा {{days_left}} दिन में ख़त्म होगा। ATM, दुकान या बैंक मित्र पर एक बार कार्ड इस्तेमाल करें।",
+    "nominee_missing": "आपके खाते में कोई नॉमिनी नहीं है",
+    "cover_active": "आपका बीमा चालू है"
+  },
+  "document_kind": {
+    "passbook": "बैंक पासबुक",
+    "death_certificate": "मृत्यु प्रमाण पत्र",
+    "aadhaar_deceased": "मृतक का आधार",
+    "aadhaar_nominee": "नॉमिनी का आधार",
+    "fir": "FIR",
+    "postmortem": "पोस्टमार्टम रिपोर्ट",
+    "disability_certificate": "विकलांगता प्रमाण पत्र",
+    "nominee_bank_proof": "नॉमिनी का बैंक प्रमाण",
+    "rupay_card": "RuPay कार्ड"
+  },
+  "deadline": {
+    "claim_submission": "दावा जमा करें",
+    "claim_intimation": "बैंक को सूचना दें",
+    "today": "आज आख़िरी दिन",
+    "days_left_one": "{{count}} दिन बाकी",
+    "days_left_other": "{{count}} दिन बाकी",
+    "passed_one": "{{count}} दिन देर",
+    "passed_other": "{{count}} दिन देर"
+  },
+  "scenario": {
+    "sunita_accident": "सुनीता: पति की सड़क दुर्घटना में मृत्यु",
+    "meena_lien": "मीना: जुड़ने के तुरंत बाद प्राकृतिक मृत्यु",
+    "raju_protect": "राजू: अपना बीमा जाँचते हैं"
+  },
+  "errors": {
+    "validation_error": "कुछ जानकारी सही नहीं है। जाँच कर फिर कोशिश करें।",
+    "invalid_token": "सत्र ख़त्म हो गया। अपना केस फिर से खोलें।",
+    "invalid_credentials": "जानकारी मेल नहीं खाती। फिर कोशिश करें।",
+    "forbidden": "आप यह केस नहीं खोल सकते।",
+    "too_many_attempts": "बहुत बार कोशिश हुई। {{minutes}} मिनट रुकें।",
+    "case_not_found": "केस नहीं मिला।",
+    "document_not_found": "दस्तावेज़ नहीं मिला।",
+    "scenario_not_found": "डेमो नहीं मिला।",
+    "unsupported_file": "फ़ोटो या PDF इस्तेमाल करें।",
+    "file_too_large": "फ़ाइल बहुत बड़ी है। नई फ़ोटो लें।",
+    "document_unreadable": "फ़ोटो पढ़ी नहीं जा सकी। अच्छी रोशनी में फिर से लें।",
+    "form_not_applicable": "इस केस में यह फ़ॉर्म नहीं चाहिए।",
+    "extractor_unavailable": "अभी पढ़ना काम नहीं कर रहा। फिर कोशिश करें।",
+    "network_error": "इंटरनेट नहीं है। फिर कोशिश करें।",
+    "unknown_error": "कुछ गड़बड़ हुई। फिर कोशिश करें।"
+  }
+}

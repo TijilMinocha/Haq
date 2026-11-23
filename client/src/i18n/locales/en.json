@@ -1,0 +1,99 @@
+{
+  "app": {
+    "name": "Haq",
+    "tagline": "Find the insurance your family is owed"
+  },
+  "schemes": {
+    "PMJJBY": {
+      "name": "PMJJBY life cover",
+      "explanation": "₹2 lakh if the account holder dies for any reason. Premium ₹436 a year, auto-debited."
+    },
+    "PMSBY": {
+      "name": "PMSBY accident cover",
+      "explanation": "₹2 lakh for accidental death or total disability. Premium ₹20 a year, auto-debited."
+    },
+    "RUPAY_PMJDY": {
+      "name": "RuPay card accident cover",
+      "explanation": "Up to ₹2 lakh for accidental death, if the RuPay card was used in the 90 days before."
+    }
+  },
+  "cover_status": {
+    "eligible": "Claimable",
+    "likely_eligible": "Likely claimable",
+    "needs_verification": "Bank must confirm",
+    "lapsed": "Lapsed",
+    "ineligible": "Not payable",
+    "not_found": "Not found"
+  },
+  "reasons": {
+    "premium_debited_current_year": "Premium was debited this year",
+    "accidental_event": "The event was an accident",
+    "card_txn_within_lookback": "Card was used within 90 days before the accident",
+    "new_card_amount": "Card issued after Aug 2018: ₹2 lakh cover",
+    "death_within_lien_period": "Death was {{days_since_enrolment}} days after joining; the first {{lien_days}} days cover accidents only",
+    "no_premium_found": "No premium debit found in the passbook",
+    "accident_only_cover": "This cover pays only for accidents",
+    "no_premium_this_cover_year": "No premium debit this year; last one on {{last_debit}}"
+  },
+  "flags": {
+    "name_mismatch": "The name differs between documents",
+    "dob_mismatch": "The date of birth differs between documents",
+    "account_mismatch": "The passbook account differs from the claim account",
+    "nominee_missing": "No nominee registered; the legal-heir route is needed",
+    "death_within_lien_period": "Death within 30 days of joining PMJJBY; it is not payable",
+    "rupay_no_recent_txn": "No card transaction in the 90 days before the accident",
+    "rupay_txn_unverifiable": "Only UPI or AEPS activity found; the bank must confirm card use",
+    "accident_docs_missing": "An FIR or post-mortem report is needed for accident claims",
+    "claim_window_closing": "Deadline is within 7 days",
+    "claim_window_passed": "The preferred window has passed; claim with an explanation",
+    "ocr_low_confidence": "Please check the details we read from the photo"
+  },
+  "alert": {
+    "cover_lapsed": "Your cover has lapsed: no premium was debited this year",
+    "rupay_expiring": "RuPay cover ends in {{days_left}} days. Use your card once at an ATM, shop or Bank Mitra.",
+    "nominee_missing": "No nominee is registered on your account",
+    "cover_active": "Your cover is active"
+  },
+  "document_kind": {
+    "passbook": "Bank passbook",
+    "death_certificate": "Death certificate",
+    "aadhaar_deceased": "Aadhaar of the deceased",
+    "aadhaar_nominee": "Aadhaar of the nominee",
+    "fir": "FIR",
+    "postmortem": "Post-mortem report",
+    "disability_certificate": "Disability certificate",
+    "nominee_bank_proof": "Nominee bank proof",
+    "rupay_card": "RuPay card"
+  },
+  "deadline": {
+    "claim_submission": "Submit the claim",
+    "claim_intimation": "Inform the bank",
+    "today": "Due today",
+    "days_left_one": "{{count}} day left",
+    "days_left_other": "{{count}} days left",
+    "passed_one": "{{count}} day late",
+    "passed_other": "{{count}} days late"
+  },
+  "scenario": {
+    "sunita_accident": "Sunita: husband died in a road accident",
+    "meena_lien": "Meena: natural death soon after joining",
+    "raju_protect": "Raju: checks his own cover"
+  },
+  "errors": {
+    "validation_error": "Some details are not valid. Please check and try again.",
+    "invalid_token": "Your session ended. Please open your case again.",
+    "invalid_credentials": "The details do not match. Please try again.",
+    "forbidden": "You cannot open this case.",
+    "too_many_attempts": "Too many tries. Please wait {{minutes}} minutes.",
+    "case_not_found": "Case not found.",
+    "document_not_found": "Document not found.",
+    "scenario_not_found": "Demo not found.",
+    "unsupported_file": "Please use a photo or a PDF.",
+    "file_too_large": "The file is too large. Please take a new photo.",
+    "document_unreadable": "We could not read this photo. Please take it again in good light.",
+    "form_not_applicable": "This form is not needed for this case.",
+    "extractor_unavailable": "Reading is not working right now. Please try again.",
+    "network_error": "No connection. Please try again.",
+    "unknown_error": "Something went wrong. Please try again."
+  }
+}
