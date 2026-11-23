@@ -1,0 +1,7 @@
+{% macro value(v) %}{% if v %}{{ v }}{% else %}<span class="blank">________________</span>{% endif %}{% endmacro %}
+{% macro row(en, hi, v) %}
+<p class="kv"><span class="k">{{ en }} / <span class="hi">{{ hi }}</span>:</span> {{ value(v) }}</p>
+{% endmacro %}
+{% macro rowhtml(en, hi) %}
+<p class="kv"><span class="k">{{ en }} / <span class="hi">{{ hi }}</span>:</span> {{ caller() }}</p>
+{% endmacro %}

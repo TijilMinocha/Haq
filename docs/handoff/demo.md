@@ -44,3 +44,11 @@ Seeded on every server start. There is no public sign-up.
 | `mitra2@haq.demo` | `haq-demo-2026` |
 
 Use the second account to show that one Bank Mitra cannot open another's case (403).
+
+## Forms and letters
+
+For a Sunita case, `GET /cases/{id}/forms/PMSBY` returns a two-page bilingual claim-details
+form: the deadline, the two blockers to fix, insured and claimant details, the premium
+evidence, the document checklist, a declaration, and a "for bank use" box.
+`GET /cases/{id}/letters/escalation?scheme=PMJJBY` returns the Hindi letter, then the English
+one. Meena's PMJJBY form returns `409 form_not_applicable`.

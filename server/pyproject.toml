@@ -10,6 +10,7 @@ dependencies = [
     "fastapi>=0.165.0",
     "httpx>=0.28.1",
     "indic-transliteration>=2.3.82",
+    "jinja2>=3.1.6",
     "opencv-python-headless>=5.1.0.95",
     "pydantic-settings>=2.16.3",
     "pyjwt>=2.15.1",

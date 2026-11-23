@@ -10,7 +10,7 @@ Covers plan sections 7 and 8 with what has changed since the plan was written.
 | Rules engine (PMJJBY, PMSBY, RuPay, cross-checks, deadlines, alerts) | Real |
 | Persistence (Postgres), case code + PIN, Bank Mitra login, lockout | Real |
 | Document reading (Tesseract OCR, Aadhaar masking) | Real. `EXTRACTOR=mock` for dev |
-| Claim forms and escalation letter PDFs | **Placeholder PDFs.** Same endpoints; real forms come in phase 5 |
+| Claim forms and escalation letter PDFs | Real. Bilingual claim-details form per scheme; Hindi + English letter (family's language first). Official bank forms get overlaid once their PDFs are added |
 | Deployed URL | Not yet (phase 7). Use localhost |
 
 Differences from the plan text:
