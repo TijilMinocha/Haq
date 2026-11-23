@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from app.core.attempts import AttemptLimiter
+from app.core.attempts import AttemptStore
 from app.core.errors import AppError, invalid_credentials
 from app.core.security import (
     hash_case_token,
@@ -33,7 +33,7 @@ DEMO_PIN = "1234"
 
 
 class CaseService:
-    def __init__(self, cases: CaseRepository, limiter: AttemptLimiter) -> None:
+    def __init__(self, cases: CaseRepository, limiter: AttemptStore) -> None:
         self._cases = cases
         self._limiter = limiter
 
@@ -71,12 +71,12 @@ class CaseService:
         return await self._store(view, DEMO_PIN, operator_id, scenario_id=scenario_id)
 
     async def resume(self, data: CaseResume) -> CaseResumed:
-        self._limiter.check(data.case_code)
+        await self._limiter.check(data.case_code)
         record = await self._cases.get_by_code(data.case_code)
         if record is None or not verify_secret(record.pin_hash, data.pin):
-            self._limiter.fail(data.case_code)
+            await self._limiter.fail(data.case_code)
             raise invalid_credentials()
-        self._limiter.reset(data.case_code)
+        await self._limiter.reset(data.case_code)
         token = new_case_token()
         record.token_hashes.add(hash_case_token(token))
         await self._cases.save(record)

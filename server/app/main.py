@@ -18,6 +18,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         await container.auth_service.seed()
         yield
+        await container.close()
 
     app = FastAPI(
         title="Haq API",

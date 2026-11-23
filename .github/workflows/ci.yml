@@ -8,6 +8,20 @@ on:
 jobs:
   server:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: haq
+          POSTGRES_PASSWORD: haq
+          POSTGRES_DB: haq
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U haq"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     defaults:
       run:
         working-directory: server
@@ -19,6 +33,8 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy app
       - run: uv run pytest
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://haq:haq@localhost:5432/haq_test
 
   client:
     runs-on: ubuntu-latest

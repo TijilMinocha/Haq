@@ -9,7 +9,7 @@ from app.main import create_app
 
 @pytest.fixture
 async def client() -> AsyncIterator[AsyncClient]:
-    app = create_app(Settings(env="test", extractor="mock"))
+    app = create_app(Settings(env="test", extractor="mock", storage="memory"))
     async with app.router.lifespan_context(app):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test/api/v1") as c:

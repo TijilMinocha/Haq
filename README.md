@@ -19,8 +19,9 @@ Requires Docker, uv, Node 22 and GNU make (on Windows, run the commands in the
 Makefile by hand or use `choco install make`).
 
 ```sh
-make dev     # postgres + server :8000 + client :5173
-make test
+make dev     # postgres + migrations + server :8000 + client :5173
+make seed    # demo Bank Mitra accounts (mitra@haq.demo, mitra2@haq.demo)
+make test    # includes Postgres integration tests against a haq_test database
 make lint
 make types   # regenerate client/src/api/schema.d.ts from the server's OpenAPI
 ```
@@ -29,8 +30,8 @@ API docs: http://localhost:8000/docs
 
 ## Status
 
-Handoff v0: every endpoint returns fixture data from the three demo scenarios with
-the final contract. Real extraction, rules and persistence come next.
+Rules engine (phase 2) and Postgres persistence with case code + PIN and Bank Mitra
+login (phase 3) are in. Document extraction still returns empty fields (phase 4).
 
 ## Privacy
 

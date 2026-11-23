@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     env: Literal["dev", "test", "prod"] = "dev"
+    storage: Literal["postgres", "memory"] = "postgres"
     database_url: str = "postgresql+asyncpg://haq:haq@localhost:5432/haq"
     jwt_secret: str = "dev-only-change-me-dev-only-change-me"
     jwt_expiry_hours: int = 12

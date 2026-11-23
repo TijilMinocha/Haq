@@ -1,7 +1,15 @@
 from dataclasses import dataclass
 
-from app.core.attempts import AttemptLimiter
+from sqlalchemy.ext.asyncio import AsyncEngine
+
+from app.core.attempts import AttemptStore, InMemoryAttemptStore
 from app.core.config import Settings
+from app.infra.db.engine import make_engine, make_sessions
+from app.infra.db.postgres import (
+    PostgresAttemptStore,
+    PostgresCaseRepository,
+    PostgresOperatorRepository,
+)
 from app.infra.db.repositories import (
     CaseRepository,
     InMemoryCaseRepository,
@@ -20,19 +28,42 @@ class Container:
     case_service: CaseService
     document_service: DocumentService
     auth_service: AuthService
+    engine: AsyncEngine | None = None
+
+    async def close(self) -> None:
+        if self.engine is not None:
+            await self.engine.dispose()
 
 
 def build_container(settings: Settings) -> Container:
     lock_seconds = settings.lockout_minutes * 60
-    cases = InMemoryCaseRepository()
-    operators = InMemoryOperatorRepository()
-    case_service = CaseService(cases, AttemptLimiter(settings.lockout_attempts, lock_seconds))
+    engine: AsyncEngine | None = None
+    cases: CaseRepository
+    operators: OperatorRepository
+    case_attempts: AttemptStore
+    login_attempts: AttemptStore
+
+    if settings.storage == "postgres":
+        engine = make_engine(settings.database_url)
+        sessions = make_sessions(engine)
+        cases = PostgresCaseRepository(sessions)
+        operators = PostgresOperatorRepository(sessions)
+        # One table serves both; case codes and emails cannot collide.
+        case_attempts = login_attempts = PostgresAttemptStore(
+            sessions, settings.lockout_attempts, lock_seconds
+        )
+    else:
+        cases = InMemoryCaseRepository()
+        operators = InMemoryOperatorRepository()
+        case_attempts = InMemoryAttemptStore(settings.lockout_attempts, lock_seconds)
+        login_attempts = InMemoryAttemptStore(settings.lockout_attempts, lock_seconds)
+
+    case_service = CaseService(cases, case_attempts)
     return Container(
         cases=cases,
         operators=operators,
         case_service=case_service,
         document_service=DocumentService(cases, case_service, settings.max_upload_mb),
-        auth_service=AuthService(
-            operators, AttemptLimiter(settings.lockout_attempts, lock_seconds)
-        ),
+        auth_service=AuthService(operators, login_attempts),
+        engine=engine,
     )
