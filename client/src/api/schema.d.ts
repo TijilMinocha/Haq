@@ -269,6 +269,20 @@ export interface components {
             /** File */
             file: string;
         };
+        /**
+         * CardFields
+         * @description Only the BIN and last 4 digits are kept; the full card number is never stored.
+         */
+        CardFields: {
+            /** Card Bin */
+            card_bin?: string | null;
+            /** Card Last4 */
+            card_last4?: string | null;
+            /** Valid From */
+            valid_from?: string | null;
+            /** Name */
+            name?: string | null;
+        };
         /** CaseCreate */
         CaseCreate: {
             mode: components["schemas"]["CaseMode"];
@@ -439,7 +453,7 @@ export interface components {
         /** DocumentPatch */
         DocumentPatch: {
             /** Fields */
-            fields: components["schemas"]["PassbookFields"] | components["schemas"]["DeathCertificateFields"] | components["schemas"]["IdentityFields"] | components["schemas"]["GenericFields"];
+            fields: components["schemas"]["PassbookFields"] | components["schemas"]["DeathCertificateFields"] | components["schemas"]["IdentityFields"] | components["schemas"]["CardFields"] | components["schemas"]["GenericFields"];
         };
         /**
          * DocumentStatus
@@ -455,7 +469,7 @@ export interface components {
             /** Confidence */
             confidence: number;
             /** Fields */
-            fields: components["schemas"]["PassbookFields"] | components["schemas"]["DeathCertificateFields"] | components["schemas"]["IdentityFields"] | components["schemas"]["GenericFields"];
+            fields: components["schemas"]["PassbookFields"] | components["schemas"]["DeathCertificateFields"] | components["schemas"]["IdentityFields"] | components["schemas"]["CardFields"] | components["schemas"]["GenericFields"];
         };
         /** ErrorDetail */
         ErrorDetail: {

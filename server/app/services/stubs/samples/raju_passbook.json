@@ -1,0 +1,41 @@
+{
+  "kind": "passbook",
+  "fields": {
+    "account_holder": "Raju Prasad",
+    "bank": "SBI",
+    "branch": "OKHLA",
+    "ifsc": "SBIN0005678",
+    "account_last4": "7730",
+    "nominee_name": null,
+    "transactions": [
+      {
+        "date": "2025-05-29",
+        "narration": "PMJJBY PREMIUM",
+        "amount": 436,
+        "direction": "debit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-05-30",
+        "narration": "PMSBY PREMIUM",
+        "amount": 20,
+        "direction": "debit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-09-06",
+        "narration": "POS KIRANA STORE",
+        "amount": 650,
+        "direction": "debit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-11-02",
+        "narration": "UPI/P2P/RAMU",
+        "amount": 500,
+        "direction": "debit",
+        "channel": "OTHER"
+      }
+    ]
+  }
+}

@@ -7,12 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.errors import ErrorResponse, install_error_handlers
+from app.infra.extractors.base import Extractor
 from app.services.container import build_container
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, extractor: Extractor | None = None) -> FastAPI:
     settings = settings or get_settings()
-    container = build_container(settings)
+    container = build_container(settings, extractor)
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:

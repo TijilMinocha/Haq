@@ -1,0 +1,10 @@
+{
+  "kind": "death_certificate",
+  "fields": {
+    "deceased_name": "Rames Kumar",
+    "date_of_death": "2026-11-15",
+    "age": 42,
+    "place_of_death": "GTB HOSPITAL DELHI",
+    "registration_number": "D-2026-118842"
+  }
+}

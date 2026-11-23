@@ -1,0 +1,41 @@
+{
+  "kind": "passbook",
+  "fields": {
+    "account_holder": "Ramesh Kumar",
+    "bank": "SBI",
+    "branch": "SEELAMPUR",
+    "ifsc": "SBIN0001234",
+    "account_last4": "4417",
+    "nominee_name": "Sunita Devi",
+    "transactions": [
+      {
+        "date": "2026-05-28",
+        "narration": "PMJJBY PREMIUM",
+        "amount": 436,
+        "direction": "debit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-05-30",
+        "narration": "PMSBY PREMIUM",
+        "amount": 20,
+        "direction": "debit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-10-02",
+        "narration": "BY CASH",
+        "amount": 3000,
+        "direction": "credit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-10-30",
+        "narration": "ATM WDL SEELAMPUR",
+        "amount": 2000,
+        "direction": "debit",
+        "channel": "OTHER"
+      }
+    ]
+  }
+}

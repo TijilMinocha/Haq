@@ -16,6 +16,8 @@ from app.infra.db.repositories import (
     InMemoryOperatorRepository,
     OperatorRepository,
 )
+from app.infra.extractors.base import Extractor
+from app.infra.extractors.factory import build_extractor
 from app.services.auth_service import AuthService
 from app.services.case_service import CaseService
 from app.services.document_service import DocumentService
@@ -35,7 +37,7 @@ class Container:
             await self.engine.dispose()
 
 
-def build_container(settings: Settings) -> Container:
+def build_container(settings: Settings, extractor: Extractor | None = None) -> Container:
     lock_seconds = settings.lockout_minutes * 60
     engine: AsyncEngine | None = None
     cases: CaseRepository
@@ -63,7 +65,9 @@ def build_container(settings: Settings) -> Container:
         cases=cases,
         operators=operators,
         case_service=case_service,
-        document_service=DocumentService(cases, case_service, settings.max_upload_mb),
+        document_service=DocumentService(
+            cases, case_service, extractor or build_extractor(settings), settings.max_upload_mb
+        ),
         auth_service=AuthService(operators, login_attempts),
         engine=engine,
     )

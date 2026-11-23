@@ -52,6 +52,7 @@ ignore_missing_imports = true
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = ["tesseract: needs the tesseract OCR binary"]
 
 [[tool.mypy.overrides]]
 # pymupdf ships partial, untyped stubs; treat it as Any rather than leak untyped calls.

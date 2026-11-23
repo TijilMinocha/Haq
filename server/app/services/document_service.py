@@ -4,36 +4,26 @@ from app.core.errors import AppError
 from app.core.security import new_id
 from app.domain.models import DocumentKind, DocumentStatus
 from app.infra.db.repositories import CaseRecord, CaseRepository
+from app.infra.extractors.base import Extractor, ExtractorUnavailable, UnreadableDocument
+from app.infra.extractors.masking import mask_model
 from app.schemas.case import CaseView
-from app.schemas.document import (
-    DeathCertificateFields,
-    DocumentFields,
-    DocumentPatch,
-    DocumentView,
-    GenericFields,
-    IdentityFields,
-    PassbookFields,
-)
+from app.schemas.document import DocumentPatch, DocumentView, fields_model
 from app.services.case_service import CaseService
 
 ALLOWED_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "application/pdf"})
 
-_FIELDS_BY_KIND: dict[DocumentKind, type[DocumentFields]] = {
-    DocumentKind.PASSBOOK: PassbookFields,
-    DocumentKind.DEATH_CERTIFICATE: DeathCertificateFields,
-    DocumentKind.AADHAAR_DECEASED: IdentityFields,
-    DocumentKind.AADHAAR_NOMINEE: IdentityFields,
-}
-
-
-def fields_model(kind: DocumentKind) -> type[DocumentFields]:
-    return _FIELDS_BY_KIND.get(kind, GenericFields)
-
 
 class DocumentService:
-    def __init__(self, cases: CaseRepository, case_service: CaseService, max_mb: int) -> None:
+    def __init__(
+        self,
+        cases: CaseRepository,
+        case_service: CaseService,
+        extractor: Extractor,
+        max_mb: int,
+    ) -> None:
         self._cases = cases
         self._case_service = case_service
+        self._extractor = extractor
         self._max_bytes = max_mb * 1024 * 1024
 
     async def add(
@@ -53,19 +43,32 @@ class DocumentService:
                 "File is too large.",
                 {"max_mb": self._max_bytes // (1024 * 1024)},
             )
-        # The bytes go no further than this call; extraction arrives in phase 4.
+        try:
+            result = await self._extractor.extract(content, content_type, kind)
+        except UnreadableDocument as exc:
+            raise AppError(
+                "document_unreadable",
+                422,
+                "Could not read this document. Please retake the photo.",
+                {"kind": kind.value},
+            ) from exc
+        except ExtractorUnavailable as exc:
+            raise AppError(
+                "extractor_unavailable", 503, "Document reading is unavailable. Try again."
+            ) from exc
+        # Only the extracted fields live on; the uploaded bytes are dropped with this call.
         document = DocumentView(
             id=new_id("d"),
             kind=kind,
             status=DocumentStatus.EXTRACTED,
-            confidence=0.0,
-            fields=fields_model(kind)(),
+            confidence=result.confidence,
+            fields=fields_model(kind).model_validate(result.fields.model_dump()),
         )
         return await self._replace_documents(record, [*record.view.documents, document])
 
     async def correct(self, record: CaseRecord, document_id: str, patch: DocumentPatch) -> CaseView:
         document = self._find(record, document_id)
-        fields = fields_model(document.kind).model_validate(patch.fields.model_dump())
+        fields = mask_model(fields_model(document.kind).model_validate(patch.fields.model_dump()))
         updated = document.model_copy(update={"fields": fields, "status": DocumentStatus.CORRECTED})
         return await self._replace_documents(
             record, [updated if d.id == document_id else d for d in record.view.documents]

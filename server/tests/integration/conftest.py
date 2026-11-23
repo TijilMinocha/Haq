@@ -76,7 +76,9 @@ def app_instance(clean_db: str) -> AppFactory:
 
     @asynccontextmanager
     async def start() -> AsyncIterator[AsyncClient]:
-        app = create_app(Settings(env="test", storage="postgres", database_url=clean_db))
+        app = create_app(
+            Settings(env="test", storage="postgres", database_url=clean_db, extractor="mock")
+        )
         async with app.router.lifespan_context(app):
             transport = ASGITransport(app=app)
             async with AsyncClient(transport=transport, base_url="http://test/api/v1") as c:

@@ -11,6 +11,7 @@ from app.schemas import evaluation as api
 from app.schemas.case import CaseView
 from app.schemas.common import Coded
 from app.schemas.document import (
+    CardFields,
     DeathCertificateFields,
     DocumentFields,
     DocumentView,
@@ -21,14 +22,15 @@ from app.schemas.document import (
 from app.services.messages import message_for
 
 
-def _passbook(doc: DocumentView, fields: PassbookFields) -> Passbook:
+def _passbook(doc: DocumentView, fields: PassbookFields, card: CardFields | None) -> Passbook:
+    # Passbooks rarely print card details, so a photographed RuPay card fills them in.
     return Passbook(
         document_id=doc.id,
         account_holder=fields.account_holder,
         account_last4=fields.account_last4,
         nominee_name=fields.nominee_name,
-        card_bin=fields.card_bin,
-        card_issued_on=fields.card_issued_on,
+        card_bin=fields.card_bin or (card.card_bin if card else None),
+        card_issued_on=fields.card_issued_on or (card.valid_from if card else None),
         transactions=tuple(
             Txn(
                 date=t.date,
@@ -51,7 +53,7 @@ def _identity(fields: DocumentFields) -> tuple[str | None, date | None, date | N
             return fields.deceased_name, fields.date_of_birth, fields.date_of_death
         case IdentityFields():
             return fields.name, fields.date_of_birth, None
-        case GenericFields():
+        case CardFields() | GenericFields():
             return fields.name, None, None
 
 
@@ -70,6 +72,7 @@ def _document(doc: DocumentView) -> DocumentFacts:
 
 def build_facts(view: CaseView, today: date) -> CaseFacts:
     readable = [d for d in view.documents if d.status is not DocumentStatus.UNREADABLE]
+    card = next((d.fields for d in readable if isinstance(d.fields, CardFields)), None)
     return CaseFacts(
         mode=view.mode,
         today=today,
@@ -79,7 +82,7 @@ def build_facts(view: CaseView, today: date) -> CaseFacts:
         event_date=view.event.date,
         nominee_name=view.nominee.name,
         passbooks=tuple(
-            _passbook(d, d.fields) for d in readable if isinstance(d.fields, PassbookFields)
+            _passbook(d, d.fields, card) for d in readable if isinstance(d.fields, PassbookFields)
         ),
         documents=tuple(_document(d) for d in readable),
         kinds_present=frozenset(d.kind for d in readable),

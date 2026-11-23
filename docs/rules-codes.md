@@ -66,6 +66,21 @@ Alerts arrive ordered: problems first, `alert.cover_active` last.
 - Statuses `eligible`, `likely_eligible` and `needs_verification` all count toward
   `total_claimable` in claim mode. Protect mode always has `total_claimable = 0`.
 - RuPay in claim mode is never plain `eligible`: the bank must confirm the card was active.
-- A freshly uploaded document has `confidence: 0` until real extraction lands (phase 4), so it
-  raises `ocr_low_confidence` until the user corrects its fields.
 - Demo scenarios shift their dates so the story is the same on any demo day.
+
+# Phase 4: extraction (handoff for the client)
+
+`make types` has been run; `schema.d.ts` now includes `CardFields`.
+
+- **New fields type `CardFields`** for `kind: "rupay_card"`: `card_bin`, `card_last4`,
+  `valid_from`, `name`. The full card number is never returned or stored.
+- **Uploads now really read the photo.** Expect 2-10 seconds on the free server.
+  - `422 document_unreadable` (`details.kind`): show the retake prompt with photo tips.
+  - `503 extractor_unavailable`: show a retry button.
+- `confidence` is now meaningful (0-1). Below 0.6, the case gets an `ocr_low_confidence`
+  flag for that document until the user corrects its fields with PATCH.
+- Aadhaar numbers come back as `XXXX-XXXX-1234`, including inside any field the user types.
+- **Demo photos** that always extract correctly live in
+  `server/app/services/stubs/samples/*.png` (Sunita's passbook, death certificate and RuPay
+  card; Meena's passbook; Raju's passbook and card). Uploading Sunita's three photos to a new
+  claim case gives ₹6,00,000 with the name-mismatch blocker.

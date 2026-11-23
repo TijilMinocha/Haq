@@ -30,8 +30,17 @@ API docs: http://localhost:8000/docs
 
 ## Status
 
-Rules engine (phase 2) and Postgres persistence with case code + PIN and Bank Mitra
-login (phase 3) are in. Document extraction still returns empty fields (phase 4).
+Rules engine (phase 2), Postgres persistence with case code + PIN and Bank Mitra login
+(phase 3), and Tesseract extraction for passbooks, death certificates, Aadhaar and RuPay
+cards (phase 4) are in.
+
+Sample document photos for the demo live in `server/app/services/stubs/samples/`
+(regenerate with `uv run python -m scripts.make_samples`). OCR tests need the tesseract
+binary; without it locally, run the whole suite in Docker:
+
+```sh
+docker build --target test -t haq-server-test server && docker run --rm haq-server-test
+```
 
 ## Privacy
 

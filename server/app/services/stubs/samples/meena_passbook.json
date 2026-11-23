@@ -1,0 +1,27 @@
+{
+  "kind": "passbook",
+  "fields": {
+    "account_holder": "Suresh Yadav",
+    "bank": "PNB",
+    "branch": "MANGOLPURI",
+    "ifsc": "PUNB0123400",
+    "account_last4": "9021",
+    "nominee_name": "Meena Yadav",
+    "transactions": [
+      {
+        "date": "2026-06-20",
+        "narration": "PMJJBY RENEWAL PREM",
+        "amount": 436,
+        "direction": "debit",
+        "channel": "OTHER"
+      },
+      {
+        "date": "2026-06-25",
+        "narration": "UPI/P2M/KIRANA",
+        "amount": 340,
+        "direction": "debit",
+        "channel": "OTHER"
+      }
+    ]
+  }
+}

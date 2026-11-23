@@ -1,0 +1,9 @@
+{
+  "kind": "rupay_card",
+  "fields": {
+    "card_bin": "607392",
+    "card_last4": "4417",
+    "valid_from": "2019-02-01",
+    "name": "Ramesh Kumar"
+  }
+}

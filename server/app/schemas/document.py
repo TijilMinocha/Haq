@@ -43,6 +43,15 @@ class IdentityFields(ApiModel):
     aadhaar_masked: str | None = Field(default=None, pattern=r"^XXXX-XXXX-\d{4}$")
 
 
+class CardFields(ApiModel):
+    """Only the BIN and last 4 digits are kept; the full card number is never stored."""
+
+    card_bin: str | None = Field(default=None, pattern=r"^\d{6}$")
+    card_last4: str | None = Field(default=None, pattern=r"^\d{4}$")
+    valid_from: dt.date | None = None
+    name: str | None = None
+
+
 class GenericFields(ApiModel):
     name: str | None = None
     date: dt.date | None = None
@@ -50,7 +59,9 @@ class GenericFields(ApiModel):
     notes: str | None = None
 
 
-DocumentFields = PassbookFields | DeathCertificateFields | IdentityFields | GenericFields
+DocumentFields = (
+    PassbookFields | DeathCertificateFields | IdentityFields | CardFields | GenericFields
+)
 
 
 class DocumentView(ApiModel):
@@ -63,3 +74,16 @@ class DocumentView(ApiModel):
 
 class DocumentPatch(ApiModel):
     fields: DocumentFields
+
+
+_FIELDS_BY_KIND: dict[DocumentKind, type[DocumentFields]] = {
+    DocumentKind.PASSBOOK: PassbookFields,
+    DocumentKind.DEATH_CERTIFICATE: DeathCertificateFields,
+    DocumentKind.AADHAAR_DECEASED: IdentityFields,
+    DocumentKind.AADHAAR_NOMINEE: IdentityFields,
+    DocumentKind.RUPAY_CARD: CardFields,
+}
+
+
+def fields_model(kind: DocumentKind) -> type[DocumentFields]:
+    return _FIELDS_BY_KIND.get(kind, GenericFields)
