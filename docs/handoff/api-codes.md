@@ -1,4 +1,4 @@
-# Rules engine codes (handoff for the client)
+# API codes (rules engine and extraction)
 
 The API contract did not change in phase 2. The engine now computes every evaluation
 instead of replaying fixtures, and it sends these codes. Translate with

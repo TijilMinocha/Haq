@@ -4,6 +4,8 @@ Finds unclaimed PMJJBY / PMSBY / RuPay PMJDY insurance from a passbook photo
 and builds a correct claim. Monorepo: server/ (FastAPI) and client/ (React PWA).
 Full plan: docs/haq-plan.pdf.
 
+**Frontend session?** Start with docs/handoff/CLAUDE-START-HERE.md before anything else.
+
 ## Commands
 make dev | make test | make lint | make types | make seed
 

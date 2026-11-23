@@ -12,8 +12,14 @@ Built for Hack With Delhi 4.0, Track 1 (claim settlement assistance for micro-in
 - `server/`: FastAPI + Pydantic v2, managed with uv
 - `client/`: React 19 + TypeScript + Vite PWA
 - `docs/`: proposal and engineering plan
+- `docs/handoff/`: backend-to-frontend handoff (start with `docs/handoff/README.md`)
 
 ## Run locally
+
+Frontend only, no Docker: see `docs/handoff/frontend-guide.md` section 2
+(`STORAGE=memory`, `EXTRACTOR=mock`).
+
+Full stack:
 
 Requires Docker, uv, Node 22 and GNU make (on Windows, run the commands in the
 Makefile by hand or use `choco install make`).
