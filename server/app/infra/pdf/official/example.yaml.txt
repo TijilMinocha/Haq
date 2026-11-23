@@ -1,9 +1,9 @@
-# Copy to <SCHEME>.yaml. Coordinates are PDF points from the top-left; y is the text baseline.
-template: PMJJBY.pdf
+# Copy to <SCHEME>.yaml. Each entry writes one value; a value may appear several times.
+# anchor: printed label text to find (exact, case-sensitive). The value goes right after it.
+#   x: fixed left edge instead (for table columns); dy: shift down in points; nth: which match.
+# Without a label in the PDF text, use x and y (points from the top-left) from the grid.
+template: pmjjby.pdf
 fields:
-  insured_name: { page: 0, x: 210, y: 182, width: 300 }
-  account: { page: 0, x: 210, y: 204 }
-  event_date: { page: 0, x: 210, y: 226 }
-  claimant_name: { page: 0, x: 210, y: 248, width: 300 }
-  claimant_relation: { page: 0, x: 210, y: 270 }
-  claim_amount: { page: 0, x: 210, y: 292, size: 10 }
+  - { value: insured_name, page: 0, anchor: "(1) Name:" }
+  - { value: claimant_name, page: 0, anchor: "NAME OF NOMINEE", x: 296 }
+  - { value: claim_amount, page: 1, x: 210, y: 292, size: 10 }

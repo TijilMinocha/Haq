@@ -15,7 +15,7 @@ _LABEL_EVERY = 100
 
 
 def main(scheme: str) -> None:
-    template = OFFICIAL_DIR / f"{scheme}.pdf"
+    template = OFFICIAL_DIR / f"{scheme.lower()}.pdf"
     doc = pymupdf.open(template)
     for number, page in enumerate(doc):
         width, height = page.rect.width, page.rect.height

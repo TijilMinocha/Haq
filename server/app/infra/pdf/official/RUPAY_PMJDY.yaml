@@ -1,0 +1,8 @@
+# RuPay PMJDY claim form 2026-27 (The Oriental Insurance Company Ltd), Annexures C and D of
+# the NPCI programme circular. Source: see SOURCES.md. Values go in the table's right column.
+template: rupay_pmjdy.pdf
+fields:
+  - { value: insured_name, page: 0, anchor: "NAME OF RUPAY CARDHOLDER", x: 296, dy: 1 }
+  - { value: card, page: 0, anchor: "RUPAY CARD NUMBER", x: 296, dy: 1 }
+  - { value: claimant_name, page: 0, anchor: "NAME OF NOMINEE", x: 296, dy: 1 }
+  - { value: event_day_date, page: 0, anchor: "DATE AND TIME OF", x: 296, dy: 1 }

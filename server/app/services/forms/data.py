@@ -34,6 +34,14 @@ def format_inr(rupees: int) -> str:
     return "₹" + ",".join([*groups, tail])
 
 
+# Official forms ask for the cause in a word, not the event description.
+_CAUSES = {
+    EventType.NATURAL_DEATH: "Natural causes",
+    EventType.ACCIDENTAL_DEATH: "Accident",
+    EventType.ACCIDENTAL_DISABILITY: "Accident",
+}
+
+
 def format_date(day: date | None) -> str | None:
     return day.strftime("%d-%m-%Y") if day else None
 
@@ -74,6 +82,9 @@ class FormData:
     ifsc: str | None
     event: Bilingual | None
     event_date: str | None
+    event_weekday: str | None
+    cause: str | None
+    has_death_certificate: bool
     place: str | None
     death_registration: str | None
     fir_number: str | None
@@ -126,6 +137,9 @@ def build(view: CaseView, cover: CoverResult) -> FormData:
     card_text = None
     if card and card.card_bin and card.card_last4:
         card_text = f"{card.card_bin[:4]} {card.card_bin[4:]}XX XXXX {card.card_last4}"
+    elif passbook and passbook.card_bin:
+        # The insurer identifies PMJDY cards by their first 6 digits; the rest stays masked.
+        card_text = f"{passbook.card_bin[:4]} {passbook.card_bin[4:]}XX XXXX XXXX"
 
     return FormData(
         scheme=scheme,
@@ -144,6 +158,9 @@ def build(view: CaseView, cover: CoverResult) -> FormData:
         ifsc=passbook.ifsc if passbook else None,
         event=Bilingual(*EVENT_NAMES[view.event.type]) if view.event.type else None,
         event_date=format_date(view.event.date),
+        event_weekday=view.event.date.strftime("%A") if view.event.date else None,
+        cause=_CAUSES.get(view.event.type) if view.event.type else None,
+        has_death_certificate=certificate is not None,
         place=certificate.place_of_death if certificate else None,
         death_registration=certificate.registration_number if certificate else None,
         fir_number=fir.reference_number if fir else None,

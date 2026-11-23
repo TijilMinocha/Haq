@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from fastapi import FastAPI, Request
@@ -5,6 +6,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from app.core.request_context import request_id
+
+log = logging.getLogger(__name__)
 
 
 class ErrorDetail(BaseModel):
@@ -50,7 +55,7 @@ def too_many_attempts(minutes: int) -> AppError:
     )
 
 
-def _body(code: str, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
+def error_body(code: str, message: str, details: dict[str, Any] | None = None) -> dict[str, Any]:
     return ErrorResponse(
         error=ErrorDetail(code=code, message=message, details=details or {})
     ).model_dump()
@@ -59,16 +64,29 @@ def _body(code: str, message: str, details: dict[str, Any] | None = None) -> dic
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(_: Request, exc: AppError) -> JSONResponse:
-        return JSONResponse(_body(exc.code, exc.message, exc.details), status_code=exc.status)
+        return JSONResponse(error_body(exc.code, exc.message, exc.details), status_code=exc.status)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
         errors = [{"loc": [str(p) for p in e["loc"]], "msg": e["msg"]} for e in exc.errors()]
         return JSONResponse(
-            _body("validation_error", "Invalid input.", {"errors": errors}), status_code=422
+            error_body("validation_error", "Invalid input.", {"errors": errors}), status_code=422
+        )
+
+    @app.exception_handler(Exception)
+    async def _unexpected(_: Request, exc: Exception) -> JSONResponse:
+        # The request id lets support find the full traceback in the logs.
+        log.exception("unhandled error")
+        return JSONResponse(
+            error_body(
+                "internal_error",
+                "Something went wrong. Please try again.",
+                {"request_id": request_id.get()},
+            ),
+            status_code=500,
         )
 
     @app.exception_handler(StarletteHTTPException)
     async def _http(_: Request, exc: StarletteHTTPException) -> JSONResponse:
         code = "not_found" if exc.status_code == 404 else "http_error"
-        return JSONResponse(_body(code, str(exc.detail)), status_code=exc.status_code)
+        return JSONResponse(error_body(code, str(exc.detail)), status_code=exc.status_code)

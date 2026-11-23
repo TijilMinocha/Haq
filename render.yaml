@@ -1,0 +1,32 @@
+# Render Blueprint: New > Blueprint, pick this repo. Free plan; values marked sync: false
+# are asked for once in the dashboard. See docs/deploy.md.
+services:
+  - type: web
+    name: haq-api
+    runtime: docker
+    plan: free
+    region: singapore
+    rootDir: server
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: ENV
+        value: prod
+      - key: STORAGE
+        value: postgres
+      - key: EXTRACTOR
+        value: tesseract
+      - key: LOG_JSON
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: CORS_ORIGIN_REGEX
+        sync: false
+      - key: SEED_OPERATOR_PASSWORD
+        sync: false

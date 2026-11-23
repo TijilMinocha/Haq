@@ -36,7 +36,8 @@ because RuPay assumes the ₹1 lakh old-card amount until the card's issue date 
 
 ## Bank Mitra test logins
 
-Seeded on every server start. There is no public sign-up.
+Seeded on every server start. There is no public sign-up. On the deployed server the
+password is `SEED_OPERATOR_PASSWORD` from Render, not the one below.
 
 | Email | Password |
 |---|---|
@@ -47,8 +48,10 @@ Use the second account to show that one Bank Mitra cannot open another's case (4
 
 ## Forms and letters
 
-For a Sunita case, `GET /cases/{id}/forms/PMSBY` returns a two-page bilingual claim-details
-form: the deadline, the two blockers to fix, insured and claimant details, the premium
-evidence, the document checklist, a declaration, and a "for bank use" box.
+For a Sunita case, `GET /cases/{id}/forms/PMSBY` returns the **official** PMSBY
+claim-cum-discharge form with Haq's values written in blue next to each label, followed by
+Haq's bilingual claim-details pages: the deadline, the two blockers to fix, the premium
+evidence, the document checklist, a declaration, and a "for bank use" box. PMJJBY and RuPay
+work the same way. The RuPay form is the 2026-27 Oriental Insurance form.
 `GET /cases/{id}/letters/escalation?scheme=PMJJBY` returns the Hindi letter, then the English
 one. Meena's PMJJBY form returns `409 form_not_applicable`.

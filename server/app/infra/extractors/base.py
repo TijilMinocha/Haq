@@ -20,6 +20,10 @@ class ExtractionResult:
 
 
 class Extractor(Protocol):
+    def ready(self) -> bool:
+        """Whether extraction can run right now (for the readiness check)."""
+        ...
+
     async def extract(
         self, content: bytes, content_type: str, kind: DocumentKind
     ) -> ExtractionResult: ...

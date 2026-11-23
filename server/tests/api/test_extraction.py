@@ -62,6 +62,9 @@ class _Failing:
     def __init__(self, error: Exception) -> None:
         self._error = error
 
+    def ready(self) -> bool:
+        return True
+
     async def extract(
         self, content: bytes, content_type: str, kind: DocumentKind
     ) -> ExtractionResult:

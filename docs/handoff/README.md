@@ -29,3 +29,25 @@ claim-form PDFs are still placeholders. Build every screen against the real serv
   in `en.json` / `hi.json`.
 - Ten new reason codes need Hindi and English text. They are listed in api-codes.md.
 - Need a new field or endpoint? Ask Tijil. Never edit `schema.d.ts` by hand.
+
+## Handoff v1 (phase 7)
+
+Same API contract, plus production behaviour. What changes for the client:
+
+- **Deployed setup**: see `docs/deploy.md`. Vercel needs `VITE_API_BASE_URL` set to the
+  Render URL plus `/api/v1`.
+- **Cold start**: the free server sleeps after 15 minutes. The first request can take about
+  a minute, so the "waking up" state after 5 seconds (`env.slowRequestMs`) matters.
+- **Rate limits**: too many uploads or logins from one phone return
+  `429 too_many_attempts` with `details.minutes = 1` and a `Retry-After` header. The
+  existing translation for `errors.too_many_attempts` covers it.
+- **500 errors** now return `error.code = "internal_error"` with `details.request_id`.
+  Add an `errors.internal_error` translation, and show the request id small on the error
+  screen so it can be reported. `unknown_error` remains the fallback.
+- **Every response** has an `X-Request-ID` header (exposed through CORS).
+- **New endpoint** `GET /api/v1/health/ready` reports whether the database and OCR are up.
+  It's for monitoring; the app does not need it. Run `npm run types` after pulling.
+- **Same-origin API** for the laptop + tunnel backup: with `VITE_API_BASE_URL=/api/v1`,
+  `npm run dev` and `npm run preview` forward `/api` to `localhost:8000`.
+- **Demo Bank Mitra password** on the deployed server is set by Tijil in Render, and is not
+  `haq-demo-2026`. Ask him for it. Locally it is unchanged.
