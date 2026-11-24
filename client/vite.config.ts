@@ -15,7 +15,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'favicon.ico', 'favicon.png', 'logo.jpg'],
       manifest: {
         name: 'Haq',
         short_name: 'Haq',
@@ -25,7 +25,11 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
-        icons: [{ src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' }],
+        icons: [
+          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' },
+          { src: 'favicon.png', sizes: '192x192', type: 'image/png' },
+          { src: 'logo.jpg', sizes: '512x512', type: 'image/jpeg' },
+        ],
       },
     }),
   ],
