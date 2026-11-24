@@ -166,8 +166,8 @@ across real banks' passbook layouts, or outcomes for real families; see the limi
 |---|---|
 | **Tijil Minocha** (lead) | Backend: API, rules engine, OCR, official forms, deployment |
 | **Piyush Patel** | Frontend: app screens, Hindi-first UX, voice, PWA |
-| **Shriyansh Gupta** | {{ROLE}} |
-| **Shubham Gupta** | {{ROLE}} |
+| **Shriyansh Gupta** | Backend : Database, persistence, testing |
+| **Shubham Gupta** | Frontend & Content Writeup |
 
 ## Repository
 
