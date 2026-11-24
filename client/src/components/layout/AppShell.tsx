@@ -15,7 +15,7 @@ export function AppShell({ children }: AppShellProps) {
         <div className="mx-auto max-w-xl px-4 py-6">{children}</div>
       </main>
       <footer className="border-t border-slate-200 bg-white py-4 px-4 text-center text-xs text-slate-500">
-        <p>हक़ (Haq) — जन सुरक्षा बीमा सहायता • Hack With Delhi 4.0</p>
+        <p>हक़ (Haq) — जन सुरक्षा बीमा सहायता</p>
       </footer>
     </div>
   );

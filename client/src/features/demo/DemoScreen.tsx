@@ -63,7 +63,7 @@ export function DemoScreen() {
     <div className="space-y-6 max-w-lg mx-auto">
       <div className="text-center pt-2">
         <span className="inline-block rounded-full bg-teal-100 px-3 py-1 text-xs font-bold text-[#0f766e]">
-          HACK WITH DELHI 4.0 • DEMO
+          DEMO SCENARIOS
         </span>
         <h1 className="mt-2 text-2xl sm:text-3xl font-extrabold text-slate-900">
           {isHi ? 'डेमो परिदृश्य (निर्णायक पैनल)' : 'Live Demo Scenarios'}
