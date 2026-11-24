@@ -72,42 +72,44 @@ export function OperatorCasesScreen() {
             {isHi ? 'कोई केस नहीं मिला।' : 'No cases found.'}
           </Card>
         ) : (
-          caseList.map((c: CaseSummary) => (
-            <Link
-              key={c.id}
-              to={`/case/${c.id}/result`}
-              className="block rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-[#0f766e] hover:shadow-xs active:bg-slate-50"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-mono text-xs font-bold text-[#0f766e] bg-teal-50 px-2 py-0.5 rounded">
-                    {c.code}
-                  </span>
-                  <p className="font-bold text-base text-slate-900 mt-1">
-                    {c.subject_name || (isHi ? 'नाम दर्ज नहीं' : 'Unnamed')}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {c.mode === 'claim'
-                      ? isHi
-                        ? 'दावा केस'
-                        : 'Claim'
-                      : isHi
-                        ? 'सुरक्षा जाँच'
-                        : 'Protect'}
-                  </p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {caseList.map((c: CaseSummary) => (
+              <Link
+                key={c.id}
+                to={`/case/${c.id}/result`}
+                className="block rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-[#0f766e] hover:shadow-xs active:bg-slate-50"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="font-mono text-xs font-bold text-[#0f766e] bg-teal-50 px-2 py-0.5 rounded">
+                      {c.code}
+                    </span>
+                    <p className="font-bold text-base text-slate-900 mt-1">
+                      {c.subject_name || (isHi ? 'नाम दर्ज नहीं' : 'Unnamed')}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {c.mode === 'claim'
+                        ? isHi
+                          ? 'दावा केस'
+                          : 'Claim'
+                        : isHi
+                          ? 'सुरक्षा जाँच'
+                          : 'Protect'}
+                    </p>
+                  </div>
 
-                <div className="text-right">
-                  <span className="font-extrabold text-base text-emerald-900 block">
-                    {formatINR(c.total_claimable)}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {new Date(c.updated_at).toLocaleDateString()}
-                  </span>
+                  <div className="text-right">
+                    <span className="font-extrabold text-base text-emerald-900 block">
+                      {formatINR(c.total_claimable)}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {new Date(c.updated_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </div>

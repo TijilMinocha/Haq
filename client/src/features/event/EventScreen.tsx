@@ -71,125 +71,171 @@ function EventForm({ caseData, caseId }: EventFormProps) {
   };
 
   return (
-    <Card className="p-4 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <Input
-          label={
-            isHi
-              ? 'खाताधारक का नाम (जिसके नाम बैंक खाता था)'
-              : 'Insured Person Name (Account holder)'
-          }
-          placeholder={isHi ? 'उदा. रमेश कुमार' : 'e.g. Ramesh Kumar'}
-          value={subjectName}
-          onChange={(e) => setSubjectName(e.target.value)}
-          enableVoice
-          onVoiceInput={(text) => setSubjectName(text)}
-          required
-        />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Form Card (Left Column) */}
+      <div className="lg:col-span-7">
+        <Card className="p-5 sm:p-6 shadow-xs border-slate-200 bg-white">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              label={
+                isHi
+                  ? 'खाताधारक का नाम (जिसके नाम बैंक खाता था)'
+                  : 'Insured Person Name (Account holder)'
+              }
+              placeholder={isHi ? 'उदा. रमेश कुमार' : 'e.g. Ramesh Kumar'}
+              value={subjectName}
+              onChange={(e) => setSubjectName(e.target.value)}
+              enableVoice
+              onVoiceInput={(text) => setSubjectName(text)}
+              required
+            />
 
-        <div>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">
-            {isHi ? 'क्या हुआ?' : 'What happened?'}
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {[
-              {
-                type: 'accidental_death' as EventType,
-                hi: 'दुर्घटना में मृत्यु',
-                en: 'Accidental death',
-                desc: isHi ? 'सड़क, कार्यस्थल, डूबना आदि' : 'Road, workplace, drowning',
-                icon: '⚠️',
-              },
-              {
-                type: 'natural_death' as EventType,
-                hi: 'सामान्य/बीमारी से मृत्यु',
-                en: 'Natural death',
-                desc: isHi ? 'बीमारी, हृदय रोग, वृद्धावस्था' : 'Illness, heart, old age',
-                icon: '🕊️',
-              },
-              {
-                type: 'accidental_disability' as EventType,
-                hi: 'दुर्घटना में विकलांगता',
-                en: 'Accidental disability',
-                desc: isHi ? 'हाथ, पैर या आँख की क्षति' : 'Loss of limbs, sight',
-                icon: '🩹',
-              },
-            ].map((opt) => (
-              <button
-                type="button"
-                key={opt.type}
-                onClick={() => setEventType(opt.type)}
-                className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
-                  eventType === opt.type
-                    ? 'border-[#0f766e] bg-teal-50 ring-2 ring-[#0f766e]'
-                    : 'border-slate-200 bg-white hover:bg-slate-50'
-                }`}
+            <div>
+              <label className="block text-sm font-semibold text-slate-800 mb-2">
+                {isHi ? 'क्या हुआ था?' : 'What happened?'}
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {[
+                  {
+                    type: 'accidental_death' as EventType,
+                    hi: 'दुर्घटना में मृत्यु',
+                    en: 'Accidental death',
+                    desc: isHi ? 'सड़क, कार्यस्थल, डूबना आदि' : 'Road, workplace, drowning',
+                    icon: '⚠️',
+                  },
+                  {
+                    type: 'natural_death' as EventType,
+                    hi: 'सामान्य/बीमारी से मृत्यु',
+                    en: 'Natural death',
+                    desc: isHi ? 'बीमारी, हृदय रोग, वृद्धावस्था' : 'Illness, heart, old age',
+                    icon: '🕊️',
+                  },
+                  {
+                    type: 'accidental_disability' as EventType,
+                    hi: 'दुर्घटना में विकलांगता',
+                    en: 'Accidental disability',
+                    desc: isHi ? 'हाथ, पैर या आँख की क्षति' : 'Loss of limbs, sight',
+                    icon: '🩹',
+                  },
+                ].map((opt) => (
+                  <button
+                    type="button"
+                    key={opt.type}
+                    onClick={() => setEventType(opt.type)}
+                    className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
+                      eventType === opt.type
+                        ? 'border-[#0f766e] bg-teal-50 ring-2 ring-[#0f766e]'
+                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="text-xl mb-1">{opt.icon}</div>
+                    <div className="font-bold text-sm text-slate-900">
+                      {isHi ? opt.hi : opt.en}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5">{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Input
+              label={isHi ? 'घटना की तारीख' : 'Date of Event'}
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              required
+            />
+
+            <div className="pt-2 border-t border-slate-200 space-y-4">
+              <h2 className="text-base font-bold text-slate-900">
+                {isHi
+                  ? 'दावेदार / नॉमिनी (जिसको पैसा मिलेगा)'
+                  : 'Claimant / Nominee (Beneficiary)'}
+              </h2>
+
+              <Input
+                label={isHi ? 'नॉमिनी का नाम' : 'Nominee Name'}
+                placeholder={isHi ? 'उदा. सुनीता देवी' : 'e.g. Sunita Devi'}
+                value={nomineeName}
+                onChange={(e) => setNomineeName(e.target.value)}
+                enableVoice
+                onVoiceInput={(text) => setNomineeName(text)}
+              />
+
+              <Input
+                label={isHi ? 'खाताधारक से रिश्ता' : 'Relation with Account Holder'}
+                placeholder={isHi ? 'उदा. पत्नी, पुत्र, माता' : 'e.g. Wife, Son, Mother'}
+                value={nomineeRelation}
+                onChange={(e) => setNomineeRelation(e.target.value)}
+                enableVoice
+                onVoiceInput={(text) => setNomineeRelation(text)}
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-800 border border-red-200">
+                {error}
+              </div>
+            )}
+
+            <div className="pt-3">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={updateCase.isPending}
               >
-                <div className="text-xl mb-1">{opt.icon}</div>
-                <div className="font-bold text-sm text-slate-900">
-                  {isHi ? opt.hi : opt.en}
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">{opt.desc}</div>
-              </button>
-            ))}
-          </div>
-        </div>
+                {isHi
+                  ? 'आगे बढ़ें (पासबुक फ़ोटो लें) →'
+                  : 'Continue (Scan Passbook) →'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
 
-        <Input
-          label={isHi ? 'घटना की तारीख' : 'Date of Event'}
-          type="date"
-          value={eventDate}
-          onChange={(e) => setEventDate(e.target.value)}
-          required
-        />
-
-        <div className="pt-2 border-t border-slate-200 space-y-4">
-          <h2 className="text-base font-bold text-slate-900">
-            {isHi
-              ? 'दावेदार / नॉमिनी (जिसको पैसा मिलेगा)'
-              : 'Claimant / Nominee (Beneficiary)'}
+      {/* Helpful Guidelines Card (Right Column on Desktop) */}
+      <div className="lg:col-span-5 space-y-4">
+        <Card className="p-5 bg-teal-50/40 border-teal-200 space-y-3">
+          <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span>💡</span>
+            <span>{isHi ? 'आवश्यक दिशा-निर्देश' : 'Important Guidance'}</span>
           </h2>
-
-          <Input
-            label={isHi ? 'नॉमिनी का नाम' : 'Nominee Name'}
-            placeholder={isHi ? 'उदा. सुनीता देवी' : 'e.g. Sunita Devi'}
-            value={nomineeName}
-            onChange={(e) => setNomineeName(e.target.value)}
-            enableVoice
-            onVoiceInput={(text) => setNomineeName(text)}
-          />
-
-          <Input
-            label={isHi ? 'खाताधारक से रिश्ता' : 'Relation with Account Holder'}
-            placeholder={isHi ? 'उदा. पत्नी, पुत्र, माता' : 'e.g. Wife, Son, Mother'}
-            value={nomineeRelation}
-            onChange={(e) => setNomineeRelation(e.target.value)}
-            enableVoice
-            onVoiceInput={(text) => setNomineeRelation(text)}
-          />
-        </div>
-
-        {error && (
-          <div className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-800 border border-red-200">
-            {error}
+          <div className="space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+            <p>
+              <strong>{isHi ? 'दुर्घटना vs सामान्य मृत्यु:' : 'Accident vs Natural:'}</strong>{' '}
+              {isHi
+                ? 'दुर्घटना में PMJJBY, PMSBY और RuPay तीनों से कुल ₹6 लाख तक मिल सकते हैं। सामान्य मृत्यु में केवल PMJJBY (₹2 लाख) मिलता है।'
+                : 'Accidental claims can yield up to ₹6L across PMJJBY, PMSBY, and RuPay. Natural death covers PMJJBY (₹2L).'}
+            </p>
+            <p>
+              <strong>{isHi ? 'नॉमिनी का नाम:' : 'Nominee Name:'}</strong>{' '}
+              {isHi
+                ? 'यदि बैंक में नॉमिनी दर्ज नहीं था, तो भी कानूनी वारिस (पत्नी/बच्चे) दावा कर सकते हैं।'
+                : 'Even if no nominee was registered in the bank, legal heirs can still claim.'}
+            </p>
+            <p>
+              <strong>{isHi ? 'आवाज से लिखें:' : 'Voice Input:'}</strong>{' '}
+              {isHi
+                ? 'माइक 🎙️ बटन दबाकर बोलें, फ़ील्ड अपने आप भर जाएगी।'
+                : 'Tap the mic 🎙️ icon to speak details in Hindi or English.'}
+            </p>
           </div>
-        )}
+        </Card>
 
-        <div className="pt-3">
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            fullWidth
-            loading={updateCase.isPending}
-          >
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-600 space-y-1">
+          <p className="font-bold text-slate-800">
+            🔒 {isHi ? 'सुरक्षित और गोपनीय' : 'Privacy Assured'}
+          </p>
+          <p>
             {isHi
-              ? 'आगे बढ़ें (पासबुक फ़ोटो लें) →'
-              : 'Continue (Scan Passbook) →'}
-          </Button>
+              ? 'आपकी जानकारी केवल सरकारी बीमा दावा तैयार करने के लिए उपयोग होती है।'
+              : 'Your data is strictly processed for generating official claim documents.'}
+          </p>
         </div>
-      </form>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -200,14 +246,14 @@ export function EventScreen() {
   const isHi = i18n.language !== 'en';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 sm:space-y-8">
       <StepIndicator currentStep="event" />
 
-      <div className="pt-2">
-        <h1 className="text-2xl font-bold text-slate-900">
+      <div className="pt-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
           {isHi ? 'घटना और परिवार की जानकारी' : 'Event and Family Details'}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm sm:text-base text-slate-600">
           {isHi
             ? 'बीमा खोजने के लिए यह बुनियादी जानकारी भरें। माइक बटन दबाकर बोल भी सकते हैं।'
             : 'Fill in details to find eligible covers. Use the mic icon for voice input.'}
