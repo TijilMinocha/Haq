@@ -20,8 +20,8 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xs">
-      <div className="mx-auto flex max-w-xl items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3">
-        <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3.5">
+        <div className="flex items-center gap-2 sm:gap-3">
           {!isHome && (
             <button
               type="button"

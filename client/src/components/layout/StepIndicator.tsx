@@ -25,9 +25,9 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
   return (
     <nav
       aria-label="Progress"
-      className="-mx-4 -mt-6 mb-6 border-b border-slate-200 bg-white px-4 py-3 shadow-2xs"
+      className="-mx-4 sm:-mx-6 lg:-mx-8 -mt-6 sm:-mt-8 mb-6 sm:mb-8 border-b border-slate-200 bg-white px-4 sm:px-6 lg:px-8 py-3.5 shadow-2xs"
     >
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-6xl">
         {/* Step Badge and Active Name */}
         <div className="flex items-center justify-between text-xs font-semibold mb-2.5">
           <span className="inline-flex items-center gap-1.5 font-bold text-[#0f766e] bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200">
