@@ -1,0 +1,195 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router';
+import { useCase } from '@/api/hooks';
+import { downloadEscalation, downloadForm } from '@/api/downloads';
+import { isApiError } from '@/api/errors';
+import type { Scheme } from '@/api/types';
+import { daysLeftLabel, formatDate } from '@/lib/format';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { StepIndicator } from '@/components/layout/StepIndicator';
+
+export function SubmitScreen() {
+  const { t, i18n } = useTranslation();
+  const { id } = useParams<{ id: string }>();
+
+  const caseQuery = useCase(id ?? '');
+  const caseData = caseQuery.data;
+
+  const [downloadingScheme, setDownloadingScheme] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const isHi = i18n.language !== 'en';
+
+  if (!caseData) {
+    return (
+      <div className="py-12 text-center text-slate-500">
+        {t('common.loading')}
+      </div>
+    );
+  }
+
+  const { evaluation } = caseData;
+  const eligibleCovers = evaluation.covers.filter(
+    (c) => c.status === 'eligible' || c.status === 'likely_eligible',
+  );
+
+  const handleDownload = async (scheme: Scheme) => {
+    if (!id) return;
+    setDownloadingScheme(scheme);
+    setDownloadError(null);
+    try {
+      await downloadForm(id, scheme);
+    } catch (err: unknown) {
+      if (isApiError(err, 'form_not_applicable')) {
+        setDownloadError(t('errors.form_not_applicable'));
+      } else {
+        setDownloadError(t('errors.unknown_error'));
+      }
+    } finally {
+      setDownloadingScheme(null);
+    }
+  };
+
+  const handleDownloadEscalation = async (scheme: Scheme) => {
+    if (!id) return;
+    setDownloadingScheme(`escalation-${scheme}`);
+    setDownloadError(null);
+    try {
+      await downloadEscalation(id, scheme);
+    } catch {
+      setDownloadError(t('errors.unknown_error'));
+    } finally {
+      setDownloadingScheme(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <StepIndicator currentStep="submit" />
+
+      <div className="pt-2">
+        <h1 className="text-2xl font-bold text-slate-900">
+          {isHi ? 'दावा फ़ॉर्म और बैंक में जमा करना' : 'Claim Forms & Bank Submission'}
+        </h1>
+        <p className="mt-1 text-sm text-slate-600">
+          {isHi
+            ? 'भरा हुआ फ़ॉर्म डाउनलोड करें, प्रिंट करें और कागज़ात के साथ बैंक शाखा में जमा करें।'
+            : 'Download pre-filled bilingual forms, print them, and submit to the bank branch.'}
+        </p>
+      </div>
+
+      {downloadError && (
+        <div className="rounded-xl bg-red-50 p-3 text-sm text-red-800 border border-red-200">
+          {downloadError}
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <h2 className="text-base font-bold text-slate-900">
+          {isHi ? 'दावा आवेदन पत्र (PDF)' : 'Pre-filled Claim Forms (PDF)'}
+        </h2>
+
+        {eligibleCovers.map((cover) => (
+          <Card key={cover.scheme} className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-base text-slate-900">
+                  {t(`schemes.${cover.scheme}.name`)}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {isHi ? 'द्विभाषी (हिंदी + अंग्रेज़ी)' : 'Bilingual claim application'}
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                size="md"
+                loading={downloadingScheme === cover.scheme}
+                onClick={() => handleDownload(cover.scheme as Scheme)}
+              >
+                📥 {t('common.download')}
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-xs">
+              <span className="text-slate-600">
+                {isHi ? 'बैंक से देरी होने पर शिकायत पत्र:' : 'Escalation letter if bank delays:'}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                loading={downloadingScheme === `escalation-${cover.scheme}`}
+                onClick={() => handleDownloadEscalation(cover.scheme as Scheme)}
+              >
+                📜 {isHi ? 'शिकायत पत्र' : 'Escalation'}
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {evaluation.deadlines.length > 0 && (
+        <Card className="p-4 bg-amber-50/50 border-amber-200 space-y-2">
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <span>⏰</span>
+            <span>{isHi ? 'अंतिम तिथि का ध्यान रखें' : 'Important Deadlines'}</span>
+          </h2>
+          <div className="space-y-1.5 text-xs">
+            {evaluation.deadlines.map((dl, idx) => (
+              <div key={idx} className="flex justify-between items-center">
+                <span className="text-slate-700">
+                  {t(`schemes.${dl.scheme}.name`)} (
+                  {formatDate(dl.due_date, i18n.language)})
+                </span>
+                <span className="font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded-full">
+                  {daysLeftLabel(dl.days_left, t)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      <Card className="p-5 space-y-3 bg-white">
+        <h2 className="text-base font-bold text-slate-900">
+          🏛️ {isHi ? 'बैंक शाखा में जमा करने के 4 नियम' : '4 Steps at Bank Branch'}
+        </h2>
+        <ol className="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+          <li>
+            <strong className="text-slate-900">
+              {isHi ? 'फ़ॉर्म का प्रिंट लें:' : 'Print the form:'}
+            </strong>{' '}
+            {isHi
+              ? 'ऊपर दिए गए बटन से फ़ॉर्म डाउनलोड कर प्रिंट करवा लें।'
+              : 'Download and print the bilingual claim details form.'}
+          </li>
+          <li>
+            <strong className="text-slate-900">
+              {isHi ? 'कागज़ात साथ जोड़ें:' : 'Attach proofs:'}
+            </strong>{' '}
+            {isHi
+              ? 'मृत्यु प्रमाण पत्र, आधार, और नॉमिनी के बैंक खाते का कैंसिल चेक/पासबुक की कॉपी लगाएँ।'
+              : 'Attach death certificate, Aadhaar, and claimant bank proof.'}
+          </li>
+          <li>
+            <strong className="text-slate-900">
+              {isHi ? 'संबंधित बैंक शाखा जाएँ:' : 'Visit the home branch:'}
+            </strong>{' '}
+            {isHi
+              ? 'जिस शाखा में खाता था, वहाँ के शाखा प्रबंधक (Branch Manager) या बैंक मित्र को दें।'
+              : 'Submit to the branch manager or Bank Mitra where account is held.'}
+          </li>
+          <li>
+            <strong className="text-slate-900">
+              {isHi ? 'पावती (Receipt) अवश्य लें:' : 'Always obtain receipt:'}
+            </strong>{' '}
+            {isHi
+              ? 'फ़ॉर्म जमा करने के बाद बैंक की सील और तारीख वाली पावती (acknowledgment) ज़रूर लें।'
+              : 'Get a stamped and dated receipt with claim reference number.'}
+          </li>
+        </ol>
+      </Card>
+    </div>
+  );
+}
