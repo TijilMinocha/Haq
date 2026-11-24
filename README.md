@@ -10,9 +10,10 @@
 </p>
 
 <p align="center">
-  <a href="{{APP_URL}}">Live app</a> ·
-  <a href="{{VIDEO_URL}}">Demo video</a> ·
+  <a href="https://haq-nu.vercel.app">Live app</a> ·
+  <a href="https://drive.google.com/file/d/1veXKKRRLhhbZLaE20WfcRD21dtCPmzu4/view?usp=sharing">Demo video</a> ·
   <a href="https://haq-api-rwbu.onrender.com/docs">API docs</a> ·
+  <a href="https://docs.google.com/presentation/d/1RTC8TVyl6Sr7NbrZ8uBc9caVWTykA7qL/edit?usp=sharing">Pitch deck</a> ·
   <a href="docs/proposal.pdf">Proposal</a>
 </p>
 
@@ -65,9 +66,9 @@ verify every claim.
 
 No login is needed for the family flow.
 
-1. Open the [live app]({{APP_URL}}). The first load can take up to a minute while the
+1. Open the [live app](https://haq-nu.vercel.app). The first load can take up to a minute while the
    free server wakes up.
-2. Go to **[/demo]({{APP_URL}}/demo)** and pick a scenario:
+2. Go to **[/demo](https://haq-nu.vercel.app/demo)** and pick a scenario:
 
    | Scenario | Story | What you should see |
    |---|---|---|
