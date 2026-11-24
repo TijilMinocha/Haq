@@ -46,7 +46,7 @@ export function Button({
     <button
       type="button"
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 select-none ${
+      className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-150 active:scale-[0.98] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 select-none ${
         variantStyles[variant]
       } ${sizeStyles[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
       {...props}

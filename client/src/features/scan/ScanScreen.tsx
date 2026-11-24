@@ -19,6 +19,7 @@ export function ScanScreen() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStage, setProcessingStage] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showTips, setShowTips] = useState(false);
 
@@ -46,7 +47,12 @@ export function ScanScreen() {
     if (!selectedFile) return;
 
     setIsProcessing(true);
+    setProcessingStage(1);
     setErrorMessage(null);
+
+    // Staged feedback timers
+    const stageTimer1 = setTimeout(() => setProcessingStage(2), 1200);
+    const stageTimer2 = setTimeout(() => setProcessingStage(3), 2500);
 
     try {
       const compressed = await compressImage(selectedFile);
@@ -74,7 +80,10 @@ export function ScanScreen() {
         setErrorMessage(t('errors.unknown_error'));
       }
     } finally {
+      clearTimeout(stageTimer1);
+      clearTimeout(stageTimer2);
       setIsProcessing(false);
+      setProcessingStage(0);
     }
   };
 
@@ -114,23 +123,49 @@ export function ScanScreen() {
         className="hidden"
       />
 
-      {/* Hidden file input / upload prompt */}
+      {/* Realistic Passbook Viewfinder Frame */}
       {!selectedFile && (
-        <Card className="p-8 text-center border-2 border-dashed border-slate-300 hover:border-[#0f766e] bg-white transition-colors">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 text-[#0f766e] text-3xl">
-              📸
-            </span>
+        <Card className="relative overflow-hidden p-6 sm:p-8 text-center border-2 border-slate-300 bg-white shadow-xs">
+          {/* Authentic viewfinder corner brackets */}
+          <div className="absolute top-4 left-4 h-6 w-6 border-t-2 border-l-2 border-[#0f766e]" />
+          <div className="absolute top-4 right-4 h-6 w-6 border-t-2 border-r-2 border-[#0f766e]" />
+          <div className="absolute bottom-4 left-4 h-6 w-6 border-b-2 border-l-2 border-[#0f766e]" />
+          <div className="absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[#0f766e]" />
+
+          {/* Passbook illustration blueprint */}
+          <div className="mx-auto max-w-xs rounded-xl border border-dashed border-slate-300 bg-slate-50/70 p-5 mb-5 space-y-2">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {isHi ? 'पासबुक प्रविष्टि' : 'PASSBOOK ENTRY'}
+              </span>
+              <span className="text-xs">🏛️</span>
+            </div>
+            <div className="h-2 w-3/4 bg-slate-200 rounded" />
+            <div className="h-2 w-1/2 bg-slate-200 rounded" />
+            <div className="pt-2 space-y-1">
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>PMJJBY DEBIT</span>
+                <span className="font-mono">₹436.00</span>
+              </div>
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>PMSBY DEBIT</span>
+                <span className="font-mono">₹20.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
             <div>
-              <p className="text-base font-bold text-slate-800">
-                {isHi ? 'कैमरा चालू करें या फ़ोटो चुनें' : 'Take photo or choose file'}
+              <p className="text-base font-bold text-slate-900">
+                {isHi ? 'कैमरा चालू करें या पासबुक फ़ोटो चुनें' : 'Open Camera or Choose Photo'}
               </p>
               <p className="text-xs text-slate-500 mt-1">
                 {isHi
-                  ? 'साफ़ रोशनी में पासबुक को सीधा रखकर फ़ोटो लें'
-                  : 'Ensure good lighting and legible numbers'}
+                  ? 'पासबुक को समतल सतह पर रखें और साफ़ रोशनी में फ़ोटो खींचें'
+                  : 'Place passbook flat under good light with all entries visible'}
               </p>
             </div>
+
             <Button
               variant="primary"
               size="lg"
@@ -142,10 +177,10 @@ export function ScanScreen() {
         </Card>
       )}
 
-      {/* Preview and Confirm */}
+      {/* Preview with Active Scanner HUD */}
       {selectedFile && (
-        <Card className="p-5 space-y-4">
-          <div className="relative rounded-xl overflow-hidden bg-slate-900 aspect-4/3 flex items-center justify-center">
+        <Card className="p-4 sm:p-5 space-y-4">
+          <div className="relative rounded-xl overflow-hidden bg-slate-950 aspect-4/3 flex items-center justify-center">
             {previewUrl ? (
               <img
                 src={previewUrl}
@@ -157,39 +192,77 @@ export function ScanScreen() {
                 📄 {selectedFile.name}
               </div>
             )}
+
+            {/* Viewfinder corner brackets on active image */}
+            <div className="pointer-events-none absolute top-3 left-3 h-5 w-5 border-t-2 border-l-2 border-teal-400" />
+            <div className="pointer-events-none absolute top-3 right-3 h-5 w-5 border-t-2 border-r-2 border-teal-400" />
+            <div className="pointer-events-none absolute bottom-3 left-3 h-5 w-5 border-b-2 border-l-2 border-teal-400" />
+            <div className="pointer-events-none absolute bottom-3 right-3 h-5 w-5 border-b-2 border-r-2 border-teal-400" />
+
+            {/* Animated Scanning Beam during OCR */}
+            {isProcessing && (
+              <div className="pointer-events-none absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-teal-400 to-transparent shadow-[0_0_12px_#2dd4bf] animate-scan z-20" />
+            )}
           </div>
 
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              fullWidth
-              disabled={isProcessing}
-              onClick={handleRetake}
-            >
-              {isHi ? '🔄 दोबारा लें' : '🔄 Retake'}
-            </Button>
-            <Button
-              variant="primary"
-              fullWidth
-              loading={isProcessing}
-              onClick={handleUpload}
-            >
-              {isProcessing
-                ? isHi
-                  ? 'जाँच रहे हैं...'
-                  : 'Reading OCR...'
-                : isHi
-                  ? 'बीमा खोजें →'
-                  : 'Find Covers →'}
-            </Button>
-          </div>
-
-          {isProcessing && (
-            <p className="text-xs text-center text-slate-500 animate-pulse">
-              {isHi
-                ? 'पासबुक से प्रविष्टियाँ पढ़ी जा रही हैं (2-5 सेकंड लग सकते हैं)...'
-                : 'Extracting bank entries from passbook (2-5 seconds)...'}
-            </p>
+          {/* Staged Scan Status Feedback */}
+          {isProcessing ? (
+            <div className="rounded-xl bg-teal-50 border border-teal-200 p-3.5 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#0f766e]">
+                <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#0f766e] border-t-transparent" />
+                <span>
+                  {isHi
+                    ? 'पासबुक की जाँच हो रही है...'
+                    : 'Analyzing Passbook Entries...'}
+                </span>
+              </div>
+              <div className="text-xs space-y-1 pl-5">
+                <p className="text-slate-700">
+                  {processingStage >= 1
+                    ? isHi
+                      ? '✓ छवि साफ़ प्राप्त हुई'
+                      : '✓ Passbook image captured'
+                    : '...'}
+                </p>
+                <p className={processingStage >= 2 ? 'text-slate-700' : 'text-slate-400'}>
+                  {processingStage >= 2
+                    ? isHi
+                      ? '✓ बैंक खाता व प्रीमियम प्रविष्टियाँ पढ़ी गईं'
+                      : '✓ Reading account & premium debits'
+                    : isHi
+                      ? '• प्रविष्टियाँ पढ़ी जा रही हैं...'
+                      : '• Scanning transactions...'}
+                </p>
+                <p className={processingStage >= 3 ? 'text-slate-700' : 'text-slate-400'}>
+                  {processingStage >= 3
+                    ? isHi
+                      ? '✓ सरकारी जन सुरक्षा नियमों का मिलान पूरा हुआ'
+                      : '✓ Matching Jan Suraksha scheme rules'
+                    : isHi
+                      ? '• बीमा पात्रता जाँची जा रही है...'
+                      : '• Evaluating eligibility rules...'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                fullWidth
+                disabled={isProcessing}
+                onClick={handleRetake}
+              >
+                {isHi ? '🔄 दोबारा लें' : '🔄 Retake'}
+              </Button>
+              <Button
+                variant="primary"
+                fullWidth
+                loading={isProcessing}
+                onClick={handleUpload}
+              >
+                {isHi ? 'बीमा खोजें →' : 'Find Covers →'}
+              </Button>
+            </div>
           )}
         </Card>
       )}
