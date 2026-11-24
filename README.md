@@ -14,7 +14,6 @@
   <a href="https://drive.google.com/file/d/1veXKKRRLhhbZLaE20WfcRD21dtCPmzu4/view?usp=sharing">Demo video</a> ·
   <a href="https://haq-api-rwbu.onrender.com/docs">API docs</a> ·
   <a href="https://docs.google.com/presentation/d/1RTC8TVyl6Sr7NbrZ8uBc9caVWTykA7qL/edit?usp=sharing">Pitch deck</a> ·
-  <a href="docs/proposal.pdf">Proposal</a>
 </p>
 
 ---
