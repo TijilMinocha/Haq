@@ -79,6 +79,18 @@ export function DocumentsScreen() {
     }
   };
 
+  const handleUploadSample = async (kind: DocumentKind, samplePath: string, fileName: string) => {
+    setUploadError(null);
+    try {
+      const res = await fetch(samplePath);
+      const blob = await res.blob();
+      const file = new File([blob], fileName, { type: 'image/png' });
+      await uploadDoc.mutateAsync({ kind, file });
+    } catch {
+      setUploadError(t('errors.unknown_error'));
+    }
+  };
+
   const handleStartEdit = (doc: DocumentView) => {
     setEditingDoc(doc);
     const entries = Object.entries(doc.fields || {});
@@ -295,14 +307,36 @@ export function DocumentsScreen() {
               </div>
 
               {!isUploaded && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  loading={uploadDoc.isPending && activeUploadKind === kind}
-                  onClick={() => handleTriggerUpload(kind)}
-                >
-                  {isHi ? '+ अपलोड करें' : '+ Upload'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  {kind === 'death_certificate' && (
+                    <button
+                      type="button"
+                      disabled={uploadDoc.isPending}
+                      onClick={() => handleUploadSample('death_certificate', '/samples/sunita_death_certificate.png', 'sunita_death_certificate.png')}
+                      className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-50 text-[#0f766e] border border-teal-200 hover:bg-teal-100 cursor-pointer disabled:opacity-50"
+                    >
+                      💡 {isHi ? 'नमूना जोड़ें' : 'Use Sample'}
+                    </button>
+                  )}
+                  {kind === 'rupay_card' && (
+                    <button
+                      type="button"
+                      disabled={uploadDoc.isPending}
+                      onClick={() => handleUploadSample('rupay_card', '/samples/sunita_rupay_card.png', 'sunita_rupay_card.png')}
+                      className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-50 text-[#0f766e] border border-teal-200 hover:bg-teal-100 cursor-pointer disabled:opacity-50"
+                    >
+                      💡 {isHi ? 'नमूना कार्ड' : 'Use Sample'}
+                    </button>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    loading={uploadDoc.isPending && activeUploadKind === kind}
+                    onClick={() => handleTriggerUpload(kind)}
+                  >
+                    {isHi ? '+ अपलोड करें' : '+ Upload'}
+                  </Button>
+                </div>
               )}
             </Card>
           );

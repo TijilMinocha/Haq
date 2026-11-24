@@ -99,6 +99,20 @@ export function ScanScreen() {
     fileInputRef.current?.click();
   };
 
+  const handleLoadSample = async (samplePath: string, fileName: string) => {
+    try {
+      const res = await fetch(samplePath);
+      const blob = await res.blob();
+      const file = new File([blob], fileName, { type: 'image/png' });
+      setSelectedFile(file);
+      setPreviewUrl(samplePath);
+      setErrorMessage(null);
+      setShowTips(false);
+    } catch {
+      setErrorMessage(t('errors.unknown_error'));
+    }
+  };
+
   return (
     <div className="space-y-6">
       {mode === 'claim' && <StepIndicator currentStep="scan" />}
@@ -173,6 +187,36 @@ export function ScanScreen() {
             >
               {isHi ? '📷 फ़ोटो खींचें / अपलोड करें' : '📷 Take Photo / Upload'}
             </Button>
+
+            {/* Quick Sample Selector for Testing & Demos */}
+            <div className="pt-4 border-t border-slate-200 w-full space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                {isHi ? '💡 या परीक्षण हेतु नमूना पासबुक चुनें:' : '💡 Or use a sample passbook for testing:'}
+              </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample('/samples/sunita_passbook.png', 'sunita_passbook.png')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-teal-50 text-[#0f766e] border border-teal-200 hover:bg-teal-100 cursor-pointer transition-colors"
+                >
+                  📄 {isHi ? 'सुनीता (₹6 लाख दावा)' : 'Sunita (₹6L Claim)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample('/samples/meena_passbook.png', 'meena_passbook.png')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 cursor-pointer transition-colors"
+                >
+                  📄 {isHi ? 'मीना (लीन अवधि)' : 'Meena (Lien)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoadSample('/samples/raju_passbook.png', 'raju_passbook.png')}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 cursor-pointer transition-colors"
+                >
+                  📄 {isHi ? 'राजू (सुरक्षा जाँच)' : 'Raju (Protect)'}
+                </button>
+              </div>
+            </div>
           </div>
         </Card>
       )}
