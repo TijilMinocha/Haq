@@ -1,0 +1,9 @@
+{
+  "kind": "aadhaar_nominee",
+  "fields": {
+    "name": "Sunita Devi",
+    "date_of_birth": "1988-08-05",
+    "gender": "F",
+    "aadhaar_masked": "XXXX-XXXX-3419"
+  }
+}

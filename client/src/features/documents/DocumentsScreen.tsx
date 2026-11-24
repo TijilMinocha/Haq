@@ -9,6 +9,44 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { StepIndicator } from '@/components/layout/StepIndicator';
 
+const SAMPLE_MAP: Partial<
+  Record<
+    DocumentKind,
+    { path: string; filename: string; labelHi: string; labelEn: string }
+  >
+> = {
+  death_certificate: {
+    path: '/samples/sunita_death_certificate.png',
+    filename: 'sunita_death_certificate.png',
+    labelHi: 'नमूना मृत्यु प्रमाण पत्र',
+    labelEn: 'Use Sample',
+  },
+  rupay_card: {
+    path: '/samples/sunita_rupay_card.png',
+    filename: 'sunita_rupay_card.png',
+    labelHi: 'नमूना रूपे कार्ड',
+    labelEn: 'Use Sample',
+  },
+  aadhaar_deceased: {
+    path: '/samples/sunita_aadhaar.png',
+    filename: 'sunita_aadhaar.png',
+    labelHi: 'नमूना आधार कार्ड',
+    labelEn: 'Use Sample',
+  },
+  nominee_bank_proof: {
+    path: '/samples/sunita_nominee_bank_proof.png',
+    filename: 'sunita_nominee_bank_proof.png',
+    labelHi: 'नमूना बैंक पासबुक',
+    labelEn: 'Use Sample',
+  },
+  aadhaar_nominee: {
+    path: '/samples/sunita_aadhaar_nominee.png',
+    filename: 'sunita_aadhaar_nominee.png',
+    labelHi: 'नमूना आधार (नॉमिनी)',
+    labelEn: 'Use Sample',
+  },
+};
+
 export function DocumentsScreen() {
   const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -93,7 +131,7 @@ export function DocumentsScreen() {
 
   const handleStartEdit = (doc: DocumentView) => {
     setEditingDoc(doc);
-    const entries = Object.entries(doc.fields || {});
+    const entries = Object.entries(doc.fields || {}).filter(([k]) => k !== 'transactions');
     if (entries[0]) {
       setEditFieldName(entries[0][0]);
       setEditFieldValue(String(entries[0][1] ?? ''));
@@ -169,11 +207,13 @@ export function DocumentsScreen() {
                 }}
                 className="w-full h-11 rounded-lg border border-slate-300 px-3 text-sm bg-white"
               >
-                {Object.keys(editingDoc.fields || {}).map((f) => (
-                  <option key={f} value={f}>
-                    {f}
-                  </option>
-                ))}
+                {Object.keys(editingDoc.fields || {})
+                  .filter((f) => f !== 'transactions')
+                  .map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
               </select>
             </div>
             <div>
@@ -254,38 +294,22 @@ export function DocumentsScreen() {
 
                     {!isUploaded && (
                       <div className="flex items-center gap-2 self-end sm:self-auto">
-                        {kind === 'death_certificate' && (
-                          <button
-                            type="button"
-                            disabled={uploadDoc.isPending}
-                            onClick={() =>
-                              handleUploadSample(
-                                'death_certificate',
-                                '/samples/sunita_death_certificate.png',
-                                'sunita_death_certificate.png',
-                              )
-                            }
-                            className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 text-[#0f766e] border border-teal-200 hover:bg-teal-100 cursor-pointer disabled:opacity-50"
-                          >
-                            💡 {isHi ? 'नमूना जोड़ें' : 'Use Sample'}
-                          </button>
-                        )}
-                        {kind === 'rupay_card' && (
-                          <button
-                            type="button"
-                            disabled={uploadDoc.isPending}
-                            onClick={() =>
-                              handleUploadSample(
-                                'rupay_card',
-                                '/samples/sunita_rupay_card.png',
-                                'sunita_rupay_card.png',
-                              )
-                            }
-                            className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 text-[#0f766e] border border-teal-200 hover:bg-teal-100 cursor-pointer disabled:opacity-50"
-                          >
-                            💡 {isHi ? 'नमूना कार्ड' : 'Use Sample'}
-                          </button>
-                        )}
+                        {(() => {
+                          const sample = SAMPLE_MAP[kind];
+                          if (!sample) return null;
+                          return (
+                            <button
+                              type="button"
+                              disabled={uploadDoc.isPending}
+                              onClick={() => {
+                                handleUploadSample(kind, sample.path, sample.filename);
+                              }}
+                              className="px-2.5 py-1.5 text-xs font-semibold rounded-lg bg-teal-50 text-[#0f766e] border border-teal-200 hover:bg-teal-100 cursor-pointer disabled:opacity-50"
+                            >
+                              💡 {isHi ? sample.labelHi : sample.labelEn}
+                            </button>
+                          );
+                        })()}
                         <Button
                           variant="outline"
                           size="sm"
@@ -373,15 +397,43 @@ export function DocumentsScreen() {
                         </div>
                       </div>
 
-                      <div className="bg-slate-50 rounded-lg p-2.5 text-xs text-slate-700 space-y-1">
-                        {Object.entries(doc.fields || {}).map(([k, v]) => (
-                          <div key={k} className="flex justify-between">
-                            <span className="text-slate-500">{k}:</span>
-                            <span className="font-medium text-slate-900">
-                              {String(v ?? '—')}
-                            </span>
-                          </div>
-                        ))}
+                      <div className="bg-slate-50 rounded-lg p-2.5 text-xs text-slate-700 space-y-1.5">
+                        {Object.entries(doc.fields || {}).map(([k, v]) => {
+                          if (k === 'transactions' && Array.isArray(v)) {
+                            return (
+                              <div key={k} className="border-t border-slate-200 pt-2 mt-1 space-y-1.5">
+                                <div className="flex justify-between items-center text-slate-600 font-medium">
+                                  <span>{isHi ? 'पहचाने गए लेन-देन (Transactions):' : 'Detected Transactions:'}</span>
+                                  <span className="font-semibold text-slate-700 bg-slate-200/60 px-2 py-0.5 rounded text-[10px]">
+                                    {v.length} entries
+                                  </span>
+                                </div>
+                                <div className="space-y-1 pt-0.5 max-h-36 overflow-y-auto">
+                                  {(v as Array<{ date?: string; narration?: string; amount?: number; direction?: string }>).map((tx, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-white border border-slate-200/80 rounded px-2 py-1 text-[11px]">
+                                      <div className="truncate max-w-[170px] sm:max-w-[200px]">
+                                        <span className="font-mono text-slate-500 mr-1.5">{tx.date}</span>
+                                        <span className="font-semibold text-slate-800">{tx.narration}</span>
+                                      </div>
+                                      <span className={`font-mono font-bold ${tx.direction === 'debit' ? 'text-slate-900' : 'text-emerald-700'}`}>
+                                        ₹{Number(tx.amount || 0).toLocaleString('en-IN')}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div key={k} className="flex justify-between">
+                              <span className="text-slate-500">{k}:</span>
+                              <span className="font-medium text-slate-900">
+                                {v === null || v === undefined || v === '' ? '—' : String(v)}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </Card>
                   );

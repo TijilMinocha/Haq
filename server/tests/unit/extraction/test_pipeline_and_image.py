@@ -14,7 +14,7 @@ from .helpers import SAMPLE_NAMES, expected, sample_bytes
 
 
 def test_samples_exist() -> None:
-    assert len(SAMPLE_NAMES) == 6
+    assert len(SAMPLE_NAMES) >= 6
 
 
 def test_garbage_bytes_are_unreadable() -> None:

@@ -1,0 +1,9 @@
+{
+  "kind": "aadhaar_deceased",
+  "fields": {
+    "name": "Ramesh Kumar",
+    "date_of_birth": "1984-03-12",
+    "gender": "M",
+    "aadhaar_masked": "XXXX-XXXX-8921"
+  }
+}
