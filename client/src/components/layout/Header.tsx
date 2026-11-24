@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { setLanguage } from '@/i18n';
 import { isOperator, subscribeOperator } from '@/lib/authStore';
+import { Logo } from '../ui/Logo';
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -44,9 +45,7 @@ export function Header() {
             </button>
           )}
           <Link to="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg bg-[#0f766e] text-white font-bold text-base sm:text-lg shadow-xs">
-              ह
-            </span>
+            <Logo />
             <div>
               <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight leading-none block">
                 {t('app.name')}
