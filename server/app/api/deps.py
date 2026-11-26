@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import Depends, Header, Path, Request
 
 from app.core.errors import case_not_found, forbidden, invalid_token
-from app.core.security import decode_operator_jwt, hash_case_token
+from app.core.middleware import client_host
+from app.core.security import decode_operator_jwt, token_matches
 from app.infra.db.repositories import CaseRecord, OperatorRecord
 from app.services.container import Container
 
@@ -14,6 +15,7 @@ def get_container(request: Request) -> Container:
 
 
 ContainerDep = Annotated[Container, Depends(get_container)]
+ClientHost = Annotated[str, Depends(client_host)]
 
 
 def _bearer(authorization: str | None) -> str | None:
@@ -61,7 +63,7 @@ async def case_access(
     if record is None:
         raise case_not_found()
     if x_case_token is not None:
-        if hash_case_token(x_case_token) in record.token_hashes:
+        if token_matches(x_case_token, record.token_hashes):
             return record
         if operator is None:
             raise invalid_token()

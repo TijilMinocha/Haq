@@ -5,6 +5,7 @@ import numpy as np
 import pymupdf
 
 from app.infra.extractors.base import UnreadableDocument
+from app.infra.extractors.sniffing import MAX_IMAGE_PIXELS
 
 Image = np.ndarray
 
@@ -17,16 +18,36 @@ _SKEW_PROBE_WIDTH = 800
 
 def decode(content: bytes, content_type: str) -> Image:
     if content_type == "application/pdf":
-        try:
-            with pymupdf.open(stream=content, filetype="pdf") as doc:
-                pix = doc[0].get_pixmap(dpi=_PDF_DPI, colorspace=pymupdf.csGRAY)
-                return np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.h, pix.w).copy()
-        except Exception as exc:
-            raise UnreadableDocument("pdf could not be rendered") from exc
-    image = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+        return _decode_pdf(content)
+    try:
+        image = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_GRAYSCALE)
+    except cv2.error as exc:
+        # cv2 raises rather than returning None when a header describes an absurd image.
+        raise UnreadableDocument("image could not be decoded") from exc
     if image is None:
         raise UnreadableDocument("image could not be decoded")
     return image
+
+
+def _decode_pdf(content: bytes) -> Image:
+    try:
+        with pymupdf.open(stream=content, filetype="pdf") as doc:
+            page = doc[0]
+            # A few hundred bytes of PDF can describe a page kilometres wide, and rendering
+            # it would allocate more memory than the instance has.
+            if _pdf_pixels(page.rect) > MAX_IMAGE_PIXELS:
+                raise UnreadableDocument("pdf page too large")
+            pix = page.get_pixmap(dpi=_PDF_DPI, colorspace=pymupdf.csGRAY)
+            return np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.h, pix.w).copy()
+    except UnreadableDocument:
+        raise
+    except Exception as exc:
+        raise UnreadableDocument("pdf could not be rendered") from exc
+
+
+def _pdf_pixels(rect: pymupdf.Rect) -> float:
+    scale = _PDF_DPI / 72
+    return float(rect.width) * scale * float(rect.height) * scale
 
 
 def resize(gray: Image) -> Image:

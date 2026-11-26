@@ -11,6 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from app.core.clock import today_ist
 from app.domain.models import CaseMode
 from app.schemas.meta import Scenario
 
@@ -66,6 +67,6 @@ def load_scenario(scenario_id: str, today: date | None = None) -> dict[str, Any]
     if raw is None:
         return None
     data: dict[str, Any] = json.loads(raw)
-    delta = (today or date.today()) - date.fromisoformat(data["as_of"])
+    delta = (today or today_ist()) - date.fromisoformat(data["as_of"])
     shifted: dict[str, Any] = _shift(data, delta)
     return shifted

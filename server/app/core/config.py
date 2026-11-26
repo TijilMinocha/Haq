@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal, Self
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 DEV_JWT_SECRET = "dev-only-change-me-dev-only-change-me"
@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     @property
     def rate_limits_enabled(self) -> bool:
         return self.env != "test"
+
+    @field_validator("cors_origins")
+    @classmethod
+    def _no_wildcard_origin(cls, origins: list[str]) -> list[str]:
+        # "*" would let any site on the internet call the API with the user's session.
+        if any(origin.strip() == "*" for origin in origins):
+            raise ValueError('CORS_ORIGINS must list the real front-end origins, not "*"')
+        return origins
 
     @model_validator(mode="after")
     def _safe_for_production(self) -> Self:

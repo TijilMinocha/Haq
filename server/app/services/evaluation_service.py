@@ -2,6 +2,7 @@
 
 from datetime import date
 
+from app.core.clock import today_ist
 from app.domain.config.loader import load_config
 from app.domain.facts import CaseFacts, DocumentFacts, Passbook, Txn
 from app.domain.models import DocumentStatus
@@ -143,5 +144,5 @@ def to_schema(result: EvaluationResult) -> api.Evaluation:
 
 
 def evaluate(view: CaseView, today: date | None = None) -> api.Evaluation:
-    facts = build_facts(view, today or date.today())
+    facts = build_facts(view, today or today_ist())
     return to_schema(run_engine(facts, load_config()))

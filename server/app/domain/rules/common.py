@@ -25,11 +25,18 @@ def premium_status(facts: CaseFacts, scheme: PremiumScheme, config: RulesConfig)
     start = config.cover_year_start
     debits = premiums(facts.transactions, scheme)
     target = cover_year_of(facts.reference_date, start)
-    paid_years = {year_paid_by(t.date, scheme, start): t for t in debits}
-    covering = paid_years.get(target)
-    # A debit after the event cannot have insured it.
-    if covering is not None and covering.date > facts.reference_date:
-        covering = None
+    paid_years = {year_paid_by(t.date, scheme, start) for t in debits}
+    # The latest debit that had paid for the target year by the reference date. Picking the
+    # latest debit per year instead let a second debit later in the year erase cover that the
+    # renewal had already bought, and lapse a policy that was in force when the event happened.
+    covering = next(
+        (
+            t
+            for t in reversed(debits)
+            if t.date <= facts.reference_date and year_paid_by(t.date, scheme, start) == target
+        ),
+        None,
+    )
     enrolled_on = covering.date if covering and (target - 1) not in paid_years else None
     return PremiumStatus(tuple(debits), covering, enrolled_on)
 

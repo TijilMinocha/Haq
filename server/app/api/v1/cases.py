@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from app.api.deps import CaseDep, ContainerDep, OptionalOperator
+from app.api.deps import CaseDep, ClientHost, ContainerDep, OptionalOperator
 from app.schemas.case import CaseCreate, CaseCreated, CaseResume, CaseResumed, CaseUpdate, CaseView
 
 router = APIRouter(prefix="/cases", tags=["cases"])
@@ -14,8 +14,8 @@ async def create_case(
 
 
 @router.post("/resume")
-async def resume_case(body: CaseResume, container: ContainerDep) -> CaseResumed:
-    return await container.case_service.resume(body)
+async def resume_case(body: CaseResume, container: ContainerDep, client: ClientHost) -> CaseResumed:
+    return await container.case_service.resume(body, client)
 
 
 @router.get("/{case_id}")

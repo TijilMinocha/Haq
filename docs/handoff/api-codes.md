@@ -61,6 +61,16 @@ New, need text in both locales:
 
 Alerts arrive ordered: problems first, `alert.cover_active` last.
 
+## `invalid_dates` (422)
+
+PATCH sent a date that cannot be true, and nothing was saved. Show the message next to
+`details.field`: `t('errors.invalid_dates.' + details.reason)`.
+
+| Reason | Field | Meaning |
+| --- | --- | --- |
+| in_future | `event.date`, `subject.date_of_birth` | The date is after today in India |
+| birth_after_event | `subject.date_of_birth` | Date of birth falls after the death or accident |
+
 ## Behaviour notes
 
 - Statuses `eligible`, `likely_eligible` and `needs_verification` all count toward
