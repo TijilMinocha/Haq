@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import date
 
+from app.core.clock import today_ist
 from app.domain.models import DocumentKind, EventType, FlagSeverity, Scheme
 from app.schemas.case import CaseView
 from app.schemas.document import (
@@ -145,7 +146,7 @@ def build(view: CaseView, cover: CoverResult) -> FormData:
         scheme=scheme,
         scheme_name=Bilingual(*SCHEME_NAMES[scheme]),
         case_code=view.code,
-        prepared_on=format_date(date.today()) or "",
+        prepared_on=format_date(today_ist()) or "",
         claim_amount=format_inr(cover.amount),
         is_death=is_death,
         insured_name=view.subject.name or (passbook.account_holder if passbook else None),
