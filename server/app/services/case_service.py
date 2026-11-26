@@ -4,6 +4,7 @@ from app.core.attempts import AttemptStore
 from app.core.clock import today_ist
 from app.core.errors import AppError, invalid_credentials, invalid_dates
 from app.core.security import (
+    DECOY_SECRET_HASH,
     hash_case_token,
     hash_secret,
     new_case_code,
@@ -31,6 +32,9 @@ from app.services.evaluation_service import evaluate
 from app.services.stub_scenarios import load_scenario
 
 DEMO_PIN = "1234"
+# One household shares an IP and may mistype its own PIN; a bot walking through case codes
+# has no such excuse, so the per-IP budget for failed resumes is several times the per-code one.
+IP_ATTEMPT_FACTOR = 4
 
 
 def _reject_impossible_dates(view: CaseView, today: date) -> None:
@@ -45,9 +49,12 @@ def _reject_impossible_dates(view: CaseView, today: date) -> None:
 
 
 class CaseService:
-    def __init__(self, cases: CaseRepository, limiter: AttemptStore) -> None:
+    def __init__(
+        self, cases: CaseRepository, attempts: AttemptStore, ip_attempts: AttemptStore
+    ) -> None:
         self._cases = cases
-        self._limiter = limiter
+        self._attempts = attempts
+        self._ip_attempts = ip_attempts
 
     async def create(self, data: CaseCreate, operator_id: str | None) -> CaseCreated:
         view = CaseView(
@@ -82,17 +89,29 @@ class CaseService:
         )
         return await self._store(view, DEMO_PIN, operator_id, scenario_id=scenario_id)
 
-    async def resume(self, data: CaseResume) -> CaseResumed:
-        await self._limiter.check(data.case_code)
+    async def resume(self, data: CaseResume, client: str) -> CaseResumed:
+        guards = self._resume_guards(data.case_code, client)
+        for store, key in guards:
+            await store.check(key)
         record = await self._cases.get_by_code(data.case_code)
-        if record is None or not verify_secret(record.pin_hash, data.pin):
-            await self._limiter.fail(data.case_code)
+        # A code that does not exist still pays for a hash, so response time cannot be
+        # used to find out which codes are real.
+        stored = record.pin_hash if record is not None else DECOY_SECRET_HASH
+        valid = verify_secret(stored, data.pin)
+        if record is None or not valid:
+            for store, key in guards:
+                await store.fail(key)
             raise invalid_credentials()
-        await self._limiter.reset(data.case_code)
+        for store, key in guards:
+            await store.reset(key)
         token = new_case_token()
         record.token_hashes.add(hash_case_token(token))
         await self._cases.save(record)
         return CaseResumed(case_id=record.view.id, access_token=token)
+
+    def _resume_guards(self, code: str, client: str) -> tuple[tuple[AttemptStore, str], ...]:
+        # Counted separately, so guesses spread over many codes still add up per caller.
+        return ((self._attempts, f"case:{code}"), (self._ip_attempts, f"ip:{client}"))
 
     def view(self, record: CaseRecord) -> CaseView:
         return record.view.model_copy(update={"evaluation": evaluate(record.view)})

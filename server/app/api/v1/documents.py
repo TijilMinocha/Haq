@@ -17,7 +17,7 @@ async def upload_document(
     kind: Annotated[DocumentKind, Form()],
     file: Annotated[UploadFile, File()],
 ) -> CaseView:
-    content = await file.read()
+    content = await container.document_service.read_upload(file)
     return await container.document_service.add(record, kind, content, file.content_type)
 
 

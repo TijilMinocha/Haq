@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 
 _WINDOW_SECONDS = 60.0
 _PRUNE_EVERY = 500
+# The one route that accepts a file body, so it gets its own tighter budget.
+UPLOAD_PATH = re.compile(r"/api/v1/cases/[^/]+/documents")
 
 
 @dataclass(frozen=True)
@@ -52,7 +54,7 @@ class SlidingWindowLimiter:
 
 def default_rules(uploads_per_minute: int, auth_per_minute: int) -> tuple[Rule, ...]:
     return (
-        Rule("upload", "POST", re.compile(r"/api/v1/cases/[^/]+/documents"), uploads_per_minute),
+        Rule("upload", "POST", UPLOAD_PATH, uploads_per_minute),
         Rule(
             "auth",
             "POST",

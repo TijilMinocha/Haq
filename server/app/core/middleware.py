@@ -15,13 +15,16 @@ from app.core.request_context import request_id
 
 log = logging.getLogger("haq.access")
 
-_INCOMING_ID = re.compile(r"^[A-Za-z0-9._-]{1,64}$")
+_INCOMING_ID = re.compile(r"[A-Za-z0-9._-]{1,64}")
 # Room for the multipart envelope around the file itself.
 _MULTIPART_OVERHEAD_BYTES = 256 * 1024
+# A digit string longer than this is past any upload limit, and int() on it is slow.
+_LONGEST_LENGTH_BYTES = 12
 _SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
+    "Strict-Transport-Security": "max-age=31536000",
     # Case data is personal; no browser or proxy should keep a copy.
     "Cache-Control": "no-store",
 }
@@ -29,9 +32,15 @@ _SECURITY_HEADERS = {
 Next = Callable[[Request], Awaitable[Response]]
 
 
-def _client(request: Request) -> str:
+def client_host(request: Request) -> str:
     # Uvicorn runs with --proxy-headers on Render, so this is the caller, not the proxy.
     return request.client.host if request.client else "unknown"
+
+
+def _too_large(length: str | None, max_body: int) -> bool:
+    if length is None or not length.isdigit():
+        return False
+    return len(length) > _LONGEST_LENGTH_BYTES or int(length) > max_body
 
 
 def install_middleware(app: FastAPI, settings: Settings) -> None:
@@ -43,7 +52,7 @@ def install_middleware(app: FastAPI, settings: Settings) -> None:
     @app.middleware("http")
     async def guard(request: Request, call_next: Next) -> Response:
         length = request.headers.get("content-length")
-        if length and length.isdigit() and int(length) > max_body:
+        if _too_large(length, max_body):
             return JSONResponse(
                 error_body(
                     "file_too_large", "File is too large.", {"max_mb": settings.max_upload_mb}
@@ -56,7 +65,7 @@ def install_middleware(app: FastAPI, settings: Settings) -> None:
             else None
         )
         if rule is not None:
-            wait = limiter.hit(rule, _client(request))
+            wait = limiter.hit(rule, client_host(request))
             if wait is not None:
                 log.warning("rate limited", extra={"rule": rule.name})
                 return JSONResponse(
@@ -74,7 +83,9 @@ def install_middleware(app: FastAPI, settings: Settings) -> None:
     @app.middleware("http")
     async def context(request: Request, call_next: Next) -> Response:
         incoming = request.headers.get("x-request-id", "")
-        rid = incoming if _INCOMING_ID.match(incoming) else uuid.uuid4().hex
+        # fullmatch, because $ also matches before a trailing newline and that would let a
+        # caller inject a header or a log line break through the echoed id.
+        rid = incoming if _INCOMING_ID.fullmatch(incoming) else uuid.uuid4().hex
         token = request_id.set(rid)
         started = time.perf_counter()
         try:

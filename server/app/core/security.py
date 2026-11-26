@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import secrets
 from datetime import UTC, datetime, timedelta
 
@@ -12,6 +13,9 @@ _hasher = PasswordHasher()
 _JWT_ALG = "HS256"
 # Unambiguous alphabet: no 0/O or 1/I/L, since families read the code aloud.
 _CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
+# Verifying against a real hash when no record exists keeps a failed lookup as slow as a
+# real one, so response time cannot tell an attacker which codes or emails are registered.
+DECOY_SECRET_HASH = _hasher.hash(secrets.token_urlsafe(16))
 
 
 def hash_secret(secret: str) -> str:
@@ -32,6 +36,16 @@ def new_case_token() -> str:
 def hash_case_token(token: str) -> str:
     # Tokens are high-entropy, so a fast hash is enough and keeps every request cheap.
     return hashlib.sha256(token.encode()).hexdigest()
+
+
+def token_matches(token: str, known: set[str]) -> bool:
+    """Whether the token is one of the stored digests, in time that does not depend on it."""
+    digest = hash_case_token(token)
+    matched = False
+    for candidate in known:
+        # No early exit: a wrong token costs the same against every stored digest.
+        matched |= hmac.compare_digest(digest, candidate)
+    return matched
 
 
 def new_case_code() -> str:

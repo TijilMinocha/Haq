@@ -20,7 +20,7 @@ from app.infra.db.repositories import (
 from app.infra.extractors.base import Extractor
 from app.infra.extractors.factory import build_extractor
 from app.services.auth_service import AuthService
-from app.services.case_service import CaseService
+from app.services.case_service import IP_ATTEMPT_FACTOR, CaseService
 from app.services.document_service import DocumentService
 
 
@@ -57,23 +57,27 @@ def build_container(settings: Settings, extractor: Extractor | None = None) -> C
     operators: OperatorRepository
     case_attempts: AttemptStore
     login_attempts: AttemptStore
+    resume_ip_attempts: AttemptStore
+    ip_attempts = settings.lockout_attempts * IP_ATTEMPT_FACTOR
 
     if settings.storage == "postgres":
         engine = make_engine(settings.database_url)
         sessions = make_sessions(engine)
         cases = PostgresCaseRepository(sessions)
         operators = PostgresOperatorRepository(sessions)
-        # One table serves both; case codes and emails cannot collide.
-        case_attempts = login_attempts = PostgresAttemptStore(
-            sessions, settings.lockout_attempts, lock_seconds
-        )
+        # One table serves all three; case codes, emails and ip keys cannot collide because
+        # the resume keys carry a prefix.
+        case_attempts = PostgresAttemptStore(sessions, settings.lockout_attempts, lock_seconds)
+        login_attempts = PostgresAttemptStore(sessions, settings.lockout_attempts, lock_seconds)
+        resume_ip_attempts = PostgresAttemptStore(sessions, ip_attempts, lock_seconds)
     else:
         cases = InMemoryCaseRepository()
         operators = InMemoryOperatorRepository()
         case_attempts = InMemoryAttemptStore(settings.lockout_attempts, lock_seconds)
         login_attempts = InMemoryAttemptStore(settings.lockout_attempts, lock_seconds)
+        resume_ip_attempts = InMemoryAttemptStore(ip_attempts, lock_seconds)
 
-    case_service = CaseService(cases, case_attempts)
+    case_service = CaseService(cases, case_attempts, resume_ip_attempts)
     reader = extractor or build_extractor(settings)
     return Container(
         cases=cases,

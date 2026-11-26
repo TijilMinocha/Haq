@@ -2,7 +2,13 @@ import logging
 
 from app.core.attempts import AttemptStore
 from app.core.errors import invalid_credentials
-from app.core.security import hash_secret, issue_operator_jwt, new_id, verify_secret
+from app.core.security import (
+    DECOY_SECRET_HASH,
+    hash_secret,
+    issue_operator_jwt,
+    new_id,
+    verify_secret,
+)
 from app.infra.db.repositories import OperatorRecord, OperatorRepository
 from app.schemas.auth import LoginRequest, LoginResponse, Operator
 
@@ -32,7 +38,11 @@ class AuthService:
         email = data.email.strip().lower()
         await self._limiter.check(email)
         record = await self._operators.get_by_email(email)
-        if record is None or not verify_secret(record.password_hash, data.password):
+        # An email that is not registered still pays for a hash, so response time cannot be
+        # used to find out which accounts exist.
+        stored = record.password_hash if record is not None else DECOY_SECRET_HASH
+        valid = verify_secret(stored, data.password)
+        if record is None or not valid:
             await self._limiter.fail(email)
             raise invalid_credentials()
         await self._limiter.reset(email)
