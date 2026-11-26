@@ -1,10 +1,14 @@
 from dataclasses import replace
+from datetime import timedelta
 
-from app.domain.models import CoverStatus, DocumentKind, EventType, FlagSeverity
+import pytest
+
+from app.domain.models import CoverStatus, DocumentKind, EventType, FlagSeverity, Scheme
 from app.domain.rules.engine import evaluate
 
 from .factories import (
     CONFIG,
+    EVENT,
     TODAY,
     atm,
     claim,
@@ -62,6 +66,42 @@ def test_claim_window_passed() -> None:
     assert flag.params["days_late"] == 5
 
 
+@pytest.mark.parametrize(
+    ("offset", "days_left", "flag"),
+    [
+        pytest.param(0, 0, "claim_window_closing", id="on-the-due-date"),
+        pytest.param(1, -1, "claim_window_passed", id="day-after-the-due-date"),
+    ],
+)
+def test_deadline_days_left_counts_from_the_due_date(
+    offset: int, days_left: int, flag: str
+) -> None:
+    due = EVENT + timedelta(days=CONFIG.pmjjby.claim_preferred_within_days)
+    result = evaluate(replace(claim(pmjjby()), today=due + timedelta(days=offset)), CONFIG)
+    (submission,) = [x for x in result.deadlines if x.scheme is Scheme.PMJJBY]
+    assert (submission.due_date, submission.days_left) == (due, days_left)
+    (raised,) = [f for f in result.flags if f.code == flag]
+    assert raised.params["days_left" if days_left >= 0 else "days_late"] == abs(days_left)
+
+
+def test_total_claimable_counts_every_live_status() -> None:
+    facts = claim(pmjjby(), pmsby(), atm("2026-10-30"), event=EventType.ACCIDENTAL_DISABILITY)
+    result = evaluate(facts, CONFIG)
+    assert {c.scheme.value: c.status for c in result.covers} == {
+        "PMJJBY": CoverStatus.INELIGIBLE,
+        "PMSBY": CoverStatus.NEEDS_VERIFICATION,
+        "RUPAY_PMJDY": CoverStatus.LIKELY_ELIGIBLE,
+    }
+    assert result.total_claimable == (
+        CONFIG.pmsby.death_or_total_disability + CONFIG.rupay.new_card_amount
+    )
+
+
+def test_total_claimable_ignores_lapsed_and_ineligible_covers() -> None:
+    facts = claim(pmjjby("2025-05-29"), pmsby("2025-05-30"), atm("2026-01-01"))
+    assert evaluate(facts, CONFIG).total_claimable == 0
+
+
 def test_flags_sorted_blockers_first_and_deduplicated() -> None:
     facts = with_docs(
         claim(pmjjby(), pmsby(), atm("2026-10-30")),
@@ -80,8 +120,11 @@ def test_natural_death_counts_only_pmjjby() -> None:
     result = evaluate(
         claim(pmjjby(), pmsby(), atm("2026-10-30"), event=EventType.NATURAL_DEATH), CONFIG
     )
-    assert result.total_claimable == 200000
-    assert {c.scheme.value: c.status for c in result.covers}["PMSBY"] is CoverStatus.INELIGIBLE
+    assert result.total_claimable == CONFIG.pmjjby.sum_assured
+    statuses = {c.scheme.value: c.status for c in result.covers}
+    assert statuses["PMJJBY"] is CoverStatus.ELIGIBLE
+    assert statuses["PMSBY"] is CoverStatus.INELIGIBLE
+    assert statuses["RUPAY_PMJDY"] is CoverStatus.INELIGIBLE
 
 
 def test_protect_mode_has_no_claim_total_and_orders_alerts() -> None:

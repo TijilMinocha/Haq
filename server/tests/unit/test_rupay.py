@@ -1,4 +1,5 @@
 from dataclasses import replace
+from datetime import timedelta
 
 import pytest
 
@@ -6,7 +7,7 @@ from app.domain.facts import CaseFacts
 from app.domain.models import CoverStatus, EventType, TxnChannel
 from app.domain.rules import rupay
 
-from .factories import CONFIG, TODAY, atm, claim, d, passbook, protect, txn
+from .factories import CONFIG, EVENT, TODAY, atm, claim, d, passbook, protect, txn
 
 
 @pytest.mark.parametrize(
@@ -69,11 +70,24 @@ def test_cover_status(facts: CaseFacts, status: CoverStatus, amount: int, reason
     assert cover.reasons[0].code == reason
 
 
-def test_window_is_90_days_inclusive() -> None:
-    assert rupay.evaluate(claim(atm("2026-08-17")), CONFIG).cover.status is (
-        CoverStatus.LIKELY_ELIGIBLE
-    )
-    assert rupay.evaluate(claim(atm("2026-08-16")), CONFIG).cover.status is CoverStatus.INELIGIBLE
+@pytest.mark.parametrize(
+    ("days_before", "status"),
+    [
+        pytest.param(CONFIG.rupay.txn_lookback_days - 1, CoverStatus.LIKELY_ELIGIBLE, id="89-days"),
+        pytest.param(CONFIG.rupay.txn_lookback_days, CoverStatus.LIKELY_ELIGIBLE, id="90-days"),
+        pytest.param(CONFIG.rupay.txn_lookback_days + 1, CoverStatus.INELIGIBLE, id="91-days"),
+        pytest.param(0, CoverStatus.LIKELY_ELIGIBLE, id="on-the-event-day"),
+    ],
+)
+def test_lookback_window_boundary(days_before: int, status: CoverStatus) -> None:
+    facts = claim(atm(EVENT - timedelta(days=days_before)))
+    assert rupay.evaluate(facts, CONFIG).cover.status is status
+
+
+def test_card_use_after_the_event_does_not_count() -> None:
+    cover = rupay.evaluate(claim(atm(EVENT + timedelta(days=1))), CONFIG).cover
+    assert cover.status is CoverStatus.INELIGIBLE
+    assert cover.reasons[0].code == "no_card_txn_in_window"
 
 
 def test_no_recent_txn_flag() -> None:
@@ -93,6 +107,61 @@ def test_extractor_channel_counts() -> None:
     assert rupay.evaluate(facts, CONFIG).cover.status is CoverStatus.LIKELY_ELIGIBLE
 
 
+CARD_USE: dict[TxnChannel, str] = {
+    TxnChannel.ATM: "ATM WDL SEELAMPUR",
+    TxnChannel.MICRO_ATM: "MATM CASH WDL",
+    TxnChannel.POS: "POS 4521 BIG BAZAAR",
+    TxnChannel.ECOM: "ECOM AMAZON",
+    TxnChannel.BC: "BC/CSP WDL",
+    TxnChannel.UPI: "UPI/1234/PAYTM",
+    TxnChannel.AEPS: "AEPS WDL",
+}
+
+
+def test_the_narrations_cover_every_configured_channel() -> None:
+    assert set(CARD_USE) == CONFIG.rupay.counting_channels | CONFIG.rupay.unverifiable_channels
+
+
+@pytest.mark.parametrize(("channel", "narration"), list(CARD_USE.items()))
+def test_only_card_channels_prove_the_card_was_used(channel: TxnChannel, narration: str) -> None:
+    counted = channel in CONFIG.rupay.counting_channels
+    expected = CoverStatus.LIKELY_ELIGIBLE if counted else CoverStatus.NEEDS_VERIFICATION
+    result = rupay.evaluate(claim(txn("2026-11-01", narration, 500)), CONFIG)
+    assert result.cover.status is expected
+
+
+@pytest.mark.parametrize(
+    ("offset", "reason", "amount"),
+    [
+        pytest.param(-1, "old_card_amount", CONFIG.rupay.old_card_amount, id="day-before"),
+        pytest.param(0, "old_card_amount", CONFIG.rupay.old_card_amount, id="on-the-cutoff"),
+        pytest.param(1, "new_card_amount", CONFIG.rupay.new_card_amount, id="day-after"),
+    ],
+)
+def test_card_issue_date_decides_the_sum_insured(offset: int, reason: str, amount: int) -> None:
+    issued = CONFIG.rupay.new_card_after + timedelta(days=offset)
+    pb = passbook(atm("2026-10-30"), card_issued_on=issued)
+    cover = rupay.evaluate(claim(passbook=pb), CONFIG).cover
+    assert (cover.amount, cover.reasons[-1].code) == (amount, reason)
+
+
+def test_unknown_issue_date_assumes_the_old_amount() -> None:
+    pb = passbook(atm("2026-10-30"), card_issued_on=None)
+    cover = rupay.evaluate(claim(passbook=pb), CONFIG).cover
+    assert (cover.amount, cover.reasons[-1].code) == (
+        CONFIG.rupay.old_card_amount,
+        "card_issue_date_unknown",
+    )
+
+
+def test_a_refund_does_not_count_as_card_use() -> None:
+    refund = txn("2026-11-01", "POS REFUND BIG BAZAAR", 650, debit=False)
+    result = rupay.evaluate(claim(refund), CONFIG)
+    assert result.cover.status is CoverStatus.INELIGIBLE
+    assert result.cover.reasons[0].code == "no_card_txn_in_window"
+    assert rupay.evaluate(protect(refund), CONFIG).cover.status is CoverStatus.LAPSED
+
+
 def test_intimation_deadline_is_hard_90_days() -> None:
     (deadline,) = rupay.evaluate(claim(atm("2026-10-30")), CONFIG).deadlines
     assert (deadline.code, deadline.due_date, deadline.hard) == (
@@ -103,20 +172,25 @@ def test_intimation_deadline_is_hard_90_days() -> None:
 
 
 @pytest.mark.parametrize(
-    ("last_use", "status", "alert", "days_left"),
+    ("days_left", "status", "alert"),
     [
-        ("2026-09-06", CoverStatus.ELIGIBLE, "alert.rupay_expiring", 12),
-        ("2026-11-20", CoverStatus.ELIGIBLE, "alert.cover_active", None),
-        ("2026-07-01", CoverStatus.LAPSED, "alert.cover_lapsed", None),
+        pytest.param(
+            CONFIG.rupay.expiry_warning_days + 1, CoverStatus.ELIGIBLE, "alert.cover_active"
+        ),
+        pytest.param(
+            CONFIG.rupay.expiry_warning_days, CoverStatus.ELIGIBLE, "alert.rupay_expiring"
+        ),
+        pytest.param(0, CoverStatus.ELIGIBLE, "alert.rupay_expiring"),
+        pytest.param(-1, CoverStatus.LAPSED, "alert.cover_lapsed"),
     ],
 )
-def test_protect_window(
-    last_use: str, status: CoverStatus, alert: str, days_left: int | None
-) -> None:
+def test_protect_expiry_boundary(days_left: int, status: CoverStatus, alert: str) -> None:
+    last_use = TODAY + timedelta(days=days_left - CONFIG.rupay.txn_lookback_days)
     result = rupay.evaluate(protect(atm(last_use)), CONFIG)
     assert result.cover.status is status
     assert result.alerts[0].code == alert
-    if days_left is not None:
+    # Only the warning carries the countdown: "active" is deliberately param-free.
+    if alert == "alert.rupay_expiring":
         assert result.alerts[0].params["days_left"] == days_left
 
 
