@@ -49,6 +49,15 @@ def case_not_found() -> AppError:
     return AppError("case_not_found", 404, "Case not found.")
 
 
+def invalid_dates(field: str, reason: str) -> AppError:
+    return AppError(
+        "invalid_dates",
+        422,
+        "These dates are not possible.",
+        {"field": field, "reason": reason},
+    )
+
+
 def too_many_attempts(minutes: int) -> AppError:
     return AppError(
         "too_many_attempts", 429, "Too many attempts. Try again later.", {"minutes": minutes}

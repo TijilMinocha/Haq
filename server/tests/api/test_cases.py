@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from httpx import AsyncClient
 
+from app.core.clock import today_ist
 from app.services.auth_service import SEED_OPERATORS
 
 
@@ -76,6 +79,66 @@ async def test_patch_merges_nested_fields(client: AsyncClient) -> None:
         url, json={"subject": {"date_of_birth": "1984-03-12"}}, headers=headers
     )
     assert res.json()["subject"] == {"name": "Ramesh Kumar", "date_of_birth": "1984-03-12"}
+
+
+async def test_future_event_date_is_rejected(client: AsyncClient) -> None:
+    created = await _create(client)
+    headers = {"X-Case-Token": created["access_token"]}
+    url = f"/cases/{created['case_id']}"
+    tomorrow = (today_ist() + timedelta(days=1)).isoformat()
+    res = await client.patch(
+        url, json={"event": {"type": "natural_death", "date": tomorrow}}, headers=headers
+    )
+    assert res.status_code == 422
+    error = res.json()["error"]
+    assert error["code"] == "invalid_dates"
+    assert error["details"] == {"field": "event.date", "reason": "in_future"}
+    unchanged = await client.get(url, headers=headers)
+    assert unchanged.json()["event"] == {"type": None, "date": None}
+
+
+async def test_future_date_of_birth_is_rejected(client: AsyncClient) -> None:
+    created = await _create(client)
+    headers = {"X-Case-Token": created["access_token"]}
+    url = f"/cases/{created['case_id']}"
+    tomorrow = (today_ist() + timedelta(days=1)).isoformat()
+    res = await client.patch(url, json={"subject": {"date_of_birth": tomorrow}}, headers=headers)
+    assert res.status_code == 422
+    error = res.json()["error"]
+    assert error["code"] == "invalid_dates"
+    assert error["details"] == {"field": "subject.date_of_birth", "reason": "in_future"}
+
+
+async def test_event_before_saved_birth_date_is_rejected(client: AsyncClient) -> None:
+    created = await _create(client)
+    headers = {"X-Case-Token": created["access_token"]}
+    url = f"/cases/{created['case_id']}"
+    saved = await client.patch(
+        url, json={"subject": {"date_of_birth": "1984-03-12"}}, headers=headers
+    )
+    assert saved.status_code == 200
+    res = await client.patch(
+        url, json={"event": {"type": "natural_death", "date": "1980-01-01"}}, headers=headers
+    )
+    assert res.status_code == 422
+    error = res.json()["error"]
+    assert error["code"] == "invalid_dates"
+    assert error["details"] == {
+        "field": "subject.date_of_birth",
+        "reason": "birth_after_event",
+    }
+
+
+async def test_event_today_is_allowed(client: AsyncClient) -> None:
+    created = await _create(client)
+    headers = {"X-Case-Token": created["access_token"]}
+    url = f"/cases/{created['case_id']}"
+    today = today_ist().isoformat()
+    res = await client.patch(
+        url, json={"event": {"type": "natural_death", "date": today}}, headers=headers
+    )
+    assert res.status_code == 200
+    assert res.json()["event"]["date"] == today
 
 
 async def test_operator_owns_cases_they_create(client: AsyncClient) -> None:

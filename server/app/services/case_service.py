@@ -1,7 +1,8 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from app.core.attempts import AttemptStore
-from app.core.errors import AppError, invalid_credentials
+from app.core.clock import today_ist
+from app.core.errors import AppError, invalid_credentials, invalid_dates
 from app.core.security import (
     hash_case_token,
     hash_secret,
@@ -30,6 +31,17 @@ from app.services.evaluation_service import evaluate
 from app.services.stub_scenarios import load_scenario
 
 DEMO_PIN = "1234"
+
+
+def _reject_impossible_dates(view: CaseView, today: date) -> None:
+    date_of_birth = view.subject.date_of_birth
+    event_date = view.event.date
+    if event_date is not None and event_date > today:
+        raise invalid_dates("event.date", "in_future")
+    if date_of_birth is not None and date_of_birth > today:
+        raise invalid_dates("subject.date_of_birth", "in_future")
+    if date_of_birth is not None and event_date is not None and date_of_birth > event_date:
+        raise invalid_dates("subject.date_of_birth", "birth_after_event")
 
 
 class CaseService:
@@ -93,7 +105,10 @@ class CaseService:
             else value
             for key, value in changes.items()
         }
-        record.view = record.view.model_copy(update={**merged, "updated_at": datetime.now(UTC)})
+        updated = record.view.model_copy(update={**merged, "updated_at": datetime.now(UTC)})
+        # The patch may carry only the event date, so compare it with the saved date of birth.
+        _reject_impossible_dates(updated, today_ist())
+        record.view = updated
         await self._cases.save(record)
         return self.view(record)
 
